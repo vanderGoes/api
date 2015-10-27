@@ -1,0 +1,11 @@
+api:
+  build: .
+  links:
+    - mongo
+  environment:
+    MONGO_HOST: mongo
+  ports:
+    - 8080
+
+mongo:
+  image: mongo:2
