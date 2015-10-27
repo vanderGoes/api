@@ -5,7 +5,7 @@ import spray.testkit.Specs2RouteTest
 
 class EventsApiServiceSpec extends Specification with Specs2RouteTest with EventsApiService {
   def actorRefFactory = system
-  def persistEvent(e: Event) = {}
+  def persistEvent(e: RawEvent) = {}
   
 /*
   "MyService" should {

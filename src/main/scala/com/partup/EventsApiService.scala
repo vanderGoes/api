@@ -23,7 +23,7 @@ class EventsApiActor(mongo: MongoClient) extends Actor with EventsApiService {
   // or timeout handling
   def receive = runRoute(myRoute)
 
-  def persistEvent(e: Event) = {
+  def persistEvent(e: RawEvent) = {
     def doc = immutable.Document(e.toJson.compactPrint)
 
     val obs = mongo
@@ -55,13 +55,13 @@ trait EventsApiService extends HttpService {
         .exists(authorizationHeader contains _.value)
   }
 
-  def persistEvent(e: Event): Unit
+  def persistEvent(e: RawEvent): Unit
 
   val myRoute =
     path("events") {
       post {
         authorize(isAuthorized) {
-          entity(as[Event]) { e =>
+          entity(as[RawEvent]) { e =>
             persistEvent(e)
             complete("OK")
           }
