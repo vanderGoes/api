@@ -26,6 +26,8 @@ class EventsApiActor(mongo: MongoClient) extends Actor with EventsApiService {
   def persistEvent(e: RawEvent) = {
     def doc = immutable.Document(e.toJson.compactPrint)
 
+    context.actorOf(Props[EventRoutingActor]) ! e
+
     val obs = mongo
       .getDatabase("events")
       .getCollection("log")

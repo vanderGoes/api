@@ -10,11 +10,17 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 assemblyOutputPath in assembly := file("target/api-with-dependencies.jar")
 
+resolvers ++= Seq(
+  "anormcypher" at "http://repo.anormcypher.org/",
+  "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
+)
+
 libraryDependencies ++= {
   val akkaV = "2.3.9"
   val sprayV = "1.3.3"
   Seq(
     "org.mongodb.scala" %% "mongo-scala-driver" % "1.0.0",
+    "org.anormcypher" %% "anormcypher" % "0.6.0",
     "io.spray" %% "spray-can" % sprayV,
     "io.spray" %% "spray-routing" % sprayV,
     "io.spray" %% "spray-json" % "1.3.2",

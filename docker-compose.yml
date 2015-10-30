@@ -2,10 +2,20 @@ api:
   build: .
   links:
     - mongo
+    - neo4j
   environment:
     MONGO_HOST: mongo
+    NEO4J_HOST: neo4j
+    NEO4J_PORT: 7474
   ports:
     - 8080
 
 mongo:
   image: mongo:2
+
+neo4j:
+  image: neo4j
+  environment:
+    NEO4J_AUTH: none
+  ports:
+    - 7474
