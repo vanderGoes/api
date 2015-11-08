@@ -1,13 +1,12 @@
 package com.partup
 
-import akka.actor.{Actor, ActorRefFactory, Props}
+import akka.actor.{Actor, ActorRefFactory}
 import com.partup.MyJsonProtocol._
-import org.mongodb.scala.MongoClient
 import spray.routing._
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
-class EventsApiActor(mongo: MongoClient) extends Actor with EventsApiService {
+class EventsApiActor extends Actor with EventsApiService {
 
   def actorRefFactory: ActorRefFactory = context
 
@@ -17,15 +16,9 @@ class EventsApiActor(mongo: MongoClient) extends Actor with EventsApiService {
   def receive = runRoute(myRoute)
 
   def persistEvent(e: RawEvent) = {
-    context.actorOf(EventLoggingActor.props(mongo)) ! e
-    context.actorOf(Props[EventRoutingActor]) ! e
+    context.actorSelection("../eventLogger") ! e
+    context.actorSelection("../eventRouter") ! e
   }
-}
-
-object EventsApiActor {
-
-  def props(mongo: MongoClient): Props = Props(new EventsApiActor(mongo))
-
 }
 
 // this trait defines our service behavior independently from the service actor

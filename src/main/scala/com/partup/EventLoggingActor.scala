@@ -1,36 +1,20 @@
 package com.partup
 
-import java.util.concurrent.TimeUnit
-
-import akka.actor.{Actor, Props}
+import akka.actor.{Props, Actor}
 import org.mongodb.scala.MongoClient
-import org.mongodb.scala.bson.collection.immutable.Document
-import com.partup.MyJsonProtocol._
-import spray.json.pimpAny
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 /**
-  * Logs all events to MongoDB with their raw payload
+  * Actor that logs events to mongo if a Mongo connection
   */
 class EventLoggingActor(mongo: MongoClient) extends Actor {
-  override def receive: Receive = {
-    case e: RawEvent =>
-
-      val doc = Document(e.toJson.compactPrint)
-
-      val obs = mongo
-        .getDatabase("events")
-        .getCollection("log")
-        .insertOne(doc)
-
-      Await.result(obs.toFuture(), Duration(2, TimeUnit.SECONDS))
+  override def receive = {
+    case e: Event =>
+      context.actorOf(MongoEventLoggingActor.props(mongo)) ! e
   }
 }
 
 object EventLoggingActor {
 
-  def props(mongo: MongoClient): Props = Props(new EventLoggingActor(mongo))
+  def props(mongo: MongoClient) = Props(new EventLoggingActor(mongo))
 
 }
