@@ -1,8 +1,5 @@
 package com.partup
 
-import java.io.ObjectInput
-import java.security.Timestamp
-
 import spray.httpx.SprayJsonSupport
 import spray.json.{JsValue, DefaultJsonProtocol}
 
