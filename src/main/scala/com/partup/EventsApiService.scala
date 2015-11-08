@@ -1,16 +1,9 @@
 package com.partup
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.{Actor, ActorRefFactory, Props}
 import com.partup.MyJsonProtocol._
 import org.mongodb.scala.MongoClient
-import org.mongodb.scala.bson.collection.immutable
-import spray.json.pimpAny
 import spray.routing._
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
@@ -24,16 +17,8 @@ class EventsApiActor(mongo: MongoClient) extends Actor with EventsApiService {
   def receive = runRoute(myRoute)
 
   def persistEvent(e: RawEvent) = {
-    def doc = immutable.Document(e.toJson.compactPrint)
-
+    context.actorOf(EventLoggingActor.props(mongo)) ! e
     context.actorOf(Props[EventRoutingActor]) ! e
-
-    val obs = mongo
-      .getDatabase("events")
-      .getCollection("log")
-      .insertOne(doc)
-
-    Await.result(obs.toFuture(), Duration(10, TimeUnit.SECONDS))
   }
 }
 
@@ -56,9 +41,6 @@ trait EventsApiService extends HttpService {
         .find(_.is("authorization"))
         .exists(authorizationHeader contains _.value)
   }
-
-  def persistEvent(e: RawEvent): Unit
-
   val myRoute =
     path("events") {
       post {
@@ -70,4 +52,6 @@ trait EventsApiService extends HttpService {
         }
       }
     }
+
+  def persistEvent(e: RawEvent): Unit
 }
