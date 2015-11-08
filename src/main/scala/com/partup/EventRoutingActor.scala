@@ -2,17 +2,16 @@ package com.partup
 
 import akka.actor.{Actor, Props}
 import spray.json.DefaultJsonProtocol._
-import spray.json.{JsValue, _}
 
 /**
- * Unpacks RawEvents and sends them to the proper receiver.
- */
+  * Unpacks RawEvents and sends them to the proper receiver.
+  */
 class EventRoutingActor extends Actor {
   override def receive: Receive = {
     case event: RawEvent =>
       event.eventname match {
         case "partups.inserted" =>
-          val payload: Map[String, JsValue] = event.payload.asJsObject.fields
+          val payload = event.payload.asJsObject.fields
           val id = payload("0").convertTo[String]
           val partup = payload("1").asJsObject.fields
           val name = partup("name").convertTo[String]
