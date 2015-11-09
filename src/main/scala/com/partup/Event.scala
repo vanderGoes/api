@@ -51,11 +51,12 @@ case class PartnersInsertedEvent(timestamp: String, partup_id: String, user_id: 
 case class SupportersInsertedEvent(timestamp: String, partup_id: String, user_id: String)
   extends Event(timestamp, "supporters.inserted")
 
-case class SupportersInvitedEvent(timestamp: String, partup_id: String, user_id: String)
-  extends Event(timestamp, "invites.inserted.partup")
-
 case class SupportersRemovedEvent(timestamp: String, partup_id: String, user_id: String)
   extends Event(timestamp, "supporters.removed")
+
+//Invitation
+case class PartupsInvitedEvent(timestamp: String, partup_id: String, user_id: String)
+  extends Event(timestamp, "invites.inserted.partup")
 
 //Members
 case class MembersInvitedEvent(timestamp: String, tribe_id:String, user_id: String)
