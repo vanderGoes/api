@@ -11,15 +11,25 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
   override def receive = {
     //Part-ups
     case PartupsInsertedEvent(_, creator_id, _id, name, network_id) =>
-      Cypher(
-        """MATCH (u {_id:'{creator_id}'},
-           |(t {_id: '{network_id}'})
-           |CREATE (p:partup {_id:'{_id}',
-           |name:'{name}'}),
-           |[u]-[r1:CREATOR_OF]->[p],
-           |[t]-[r2:PART_OF]->[p]
-         """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("network_id", network_id))
+      if(network_id != null){
+        Cypher(
+          """MATCH (u {_id:'{creator_id}'},
+            |(t {_id: '{network_id}'})
+            |CREATE (p:partup {_id:'{_id}',
+            |name:'{name}'}),
+            |(u)-[:CREATOR_OF]->(p),
+            |(t)-[:PART_OF]->(p)
+          """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("network_id", network_id))
           .execute()(conn)
+      }else{
+        Cypher(
+          """MATCH (u {_id:'{creator_id}'}
+            |CREATE (p:partup {_id:'{_id}',
+            |name:'{name}'}),
+            |(u)-[:CREATOR_OF]->(p)
+          """).on(("creator_id", creator_id), ("_id", _id), ("name", name))
+          .execute()(conn)
+      }
 
     case PartupsUpdatedEvent(_, _id, name) =>
       Cypher(
@@ -48,7 +58,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         """MATCH (u {_id:'{admin_id}'})
            |CREATE (t:tribe {_id:'{_id}',
            |name:'{name}'}),
-           |[u]-[r:ADMIN_OF]->[t]
+           |(u)-[:ADMIN_OF]->(t)
          """).on(("_id", _id), ("name", name), ("network_id", network_id), ("admin_id", admin_id))
         .execute()(conn)
 
@@ -100,7 +110,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (p {_id:'{partup_id}'}),
            |(u {_id:'{_id}')
-           |CREATE [u]-[r:PARTNER_IN]->[p]
+           |CREATE (u)-[:PARTNER_IN]->(p)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
@@ -109,13 +119,13 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """Match (u {_id:'{_id}'),
            |(p {_id:'{partup_id}'})
-           |CREATE [u]-[r:SUPPORTER_IN]->[p]
+           |CREATE (u)-[:SUPPORTER_IN]->(p)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case SupportersRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH(u {_id:'{_id}'})-[r]->(p {_id:'{partup_id}'})
+        """MATCH (u {_id:'{_id}'})-[r]->(p {_id:'{partup_id}'})
            |DELETE r
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -125,7 +135,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (u {_id:'{_id}'}),
           |(t {_id:'{tribe_id}'})
-          |CREATE [u]-[r:MEMBER_OF]->[t]
+          |CREATE (u)-[:MEMBER_OF]->(t)
         """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
@@ -133,7 +143,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (u {_id:'{_id}'}),
           |(t {_id:'{tribe_id}'})
-          |CREATE [u]-[r:MEMBER_OF]->[t]
+          |CREATE (u)-[:MEMBER_OF]->(t)
         """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
