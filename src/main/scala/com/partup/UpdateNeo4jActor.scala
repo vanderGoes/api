@@ -108,9 +108,13 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Partners
     case PartnersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (p {_id:'{partup_id}'}),
-           |(u {_id:'{_id}')
-           |CREATE (u)-[:PARTNER_IN]->(p)
+        """MATCH (u {_id:'{_id}'),
+           |(p {_id:'{partup_id}'})           |
+           |OPTIONAL MATCH (u)-[r:SUPPORTER_OF]->(p)
+           |CREATE (u)-[z:PARTNER_IN]->(p)
+           |SET u.temp_pv = r.pageViews
+           |SET z.pageViews = u.temp_pv
+           |DELETE r
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
