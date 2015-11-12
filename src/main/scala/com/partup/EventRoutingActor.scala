@@ -62,10 +62,10 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val network_id = tribe("network_id").convertTo[String]
+          val tribe_id = tribe("network_id").convertTo[String]
           val admin_id = tribe("admin_id").convertTo[String]
 
-          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, network_id, admin_id)
+          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, tribe_id, admin_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -144,7 +144,7 @@ class EventRoutingActor extends Actor {
           val partup_id = payload("0").convertTo[String]
           val user_id = payload("1").convertTo[String]
 
-          val createdEvent = PartnersInsertedEvent(event.timestamp, partup_id, user_id)
+          val createdEvent = PartnersInsertedEvent(event.timestamp, user_id, partup_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -156,7 +156,7 @@ class EventRoutingActor extends Actor {
           val user = payload("1").asJsObject.fields
           val user_id = user("_id").convertTo[String]
 
-          val createdEvent = SupportersInsertedEvent(event.timestamp, partup_id, user_id)
+          val createdEvent = SupportersInsertedEvent(event.timestamp, user_id, partup_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -167,56 +167,46 @@ class EventRoutingActor extends Actor {
           val user = payload("1").asJsObject.fields
           val user_id = user("_id").convertTo[String]
 
-          val createdEvent = SupportersRemovedEvent(event.timestamp, partup_id, user_id)
-
-          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
-
-        //Invitation
-        case "invites.inserted.partup" =>
-          val payload = event.payload.asJsObject.fields
-          val partup_user = payload("0").asJsObject.fields
-          val partup_user_id = partup_user("_id").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val partup_id = partup("_id").convertTo[String]
-          val user = payload("2").asJsObject.fields
-          val user_id = user("_id").convertTo[String]
-
-          val createdEvent = PartupsInvitedEvent(event.timestamp, partup_id, user_id)
+          val createdEvent = SupportersRemovedEvent(event.timestamp, user_id, partup_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
         //Member
-        case "invites.inserted.network" =>
-          val payload = event.payload.asJsObject.fields
-          val inviter = payload("0").asJsObject.fields
-          val inviter_id = inviter("_id").convertTo[String]
-          val tribe = payload("1").asJsObject.fields
-          val tribe_id = tribe("_id").convertTo[String]
-          val user = payload("2").asJsObject.fields
-          val user_id = user("_id").convertTo[String]
-
-          val createdEvent = MembersInvitedEvent(event.timestamp, tribe_id, user_id)
-
-          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
-
-        case "networks.new_pending_upper" =>
-          val payload = event.payload.asJsObject.fields
-          val tribe = payload("0").asJsObject.fields
-          val tribe_id = tribe("_id").convertTo[String]
-          val user = payload("1").asJsObject.fields
-          val user_id = user("id").convertTo[String]
-
-          val createdEvent = MembersPendingEvent(event.timestamp, tribe_id, user_id)
-
-          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
-
         case "networks.accepted" =>
           val payload = event.payload.asJsObject.fields
           val tribe_user_id = payload("0").convertTo[String]
           val tribe_id = payload("1").convertTo[String]
-          val user_id = payload("2").convertTo[String]
+          val _id = payload("2").convertTo[String]
 
-          val createdEvent = MembersAcceptedEvent(event.timestamp, tribe_id, user_id)
+          val createdEvent = MembersInsertedEvent(event.timestamp, _id, tribe_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
+        case "network.uppers.inserted" =>
+          val payload = event.payload.asJsObject.fields
+          val _id = payload("0").convertTo[String]
+          val tribe_id = payload("1").convertTo[String]
+
+          val createdEvent = MembersInsertedEvent(event.timestamp, _id, tribe_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
+        case "networks.uppers.remove" =>
+          val payload = event.payload.asJsObject.fields
+          val _id = payload("0").convertTo[String]
+          val tribe_id = payload("1").convertTo[String]
+
+          val createdEvent = MembersRemovedEvent(event.timestamp, _id, tribe_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
+        //Analytics
+        case "partups.analytics.click" =>
+          val payload = event.payload.asJsObject.fields
+          val partup_id = payload("0").convertTo[String]
+          val _id = payload("1").convertTo[String]
+
+          val createdEvent = AnalyticsPageViewEvent(event.timestamp, _id, partup_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 

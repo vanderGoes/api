@@ -96,64 +96,62 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Partners
-    case PartnersInsertedEvent(_, partup_id, user_id) =>
+    case PartnersInsertedEvent(_, _id, partup_id) =>
       Cypher(
         """MATCH (p {_id:'{partup_id}'}),
-           |(u {_id:'{user_id}')
+           |(u {_id:'{_id}')
            |CREATE [u]-[r:PARTNER_IN]->[p]
-         """).on(("partup_id", partup_id), ("user_id", user_id))
+         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Supporters
-    case SupportersInsertedEvent(_, partup_id, user_id) =>
+    case SupportersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """Match (p {_id:'{partup_id}'}),
-           |(u {_id:'{user_id}')
+        """Match (u {_id:'{_id}'),
+           |(p {_id:'{partup_id}'})
            |CREATE [u]-[r:SUPPORTER_IN]->[p]
-         """).on(("_id", partup_id), ("user_id", user_id))
+         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
-    case SupportersRemovedEvent(_, partup_id, user_id) =>
+    case SupportersRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (p {_id:'{partup_id}'}),
-           |(u {_id:'{user_id}'}),
-           |[u]-[r:SUPPORTER_OF]->[p]
+        """MATCH(u {_id:'{_id}'})-[r]->(p {_id:'{partup_id}'})
            |DELETE r
-         """).on(("partup_id", partup_id), ("user_id", user_id))
-        .execute()(conn)
-
-    //Invitation
-    case PartupsInvitedEvent(_, partup_id, user_id) =>
-      Cypher(
-        """MATCH (p {_id:'{partup_id}'}),
-           |(u {_id:'{user_id}'})
-           |CREATE [u]-[r:INVITED_FOR]->[p]
-         """).on(("partup_id", partup_id), ("user_id", user_id))
+         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Members
-    case MembersInvitedEvent(_, tribe_id, user_id) =>
+    case MembersAcceptedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH(u {_id:'{user_id}'}),
-           |(t {_id:'{tribe_id}'})
-           |CREATE [u]-[r:INVITED_MEMBER_OF]->[t]
-         """).on(("tribe_id", tribe_id), ("user_id", user_id))
+        """MATCH (u {_id:'{_id}'}),
+          |(t {_id:'{tribe_id}'})
+          |CREATE [u]-[r:MEMBER_OF]->[t]
+        """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
-    case MembersPendingEvent(_, tribe_id, user_id) =>
+    case MembersInsertedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH (t {_id:'{tribe_id}'}),
-          |(u {_id:'{user_id}'})
-          |CREATE [u]-[r:PENDING_MEMBER_OF]->[t]
-        """).on(("tribe_id", tribe_id), ("user_id", user_id))
+        """MATCH (u {_id:'{_id}'}),
+          |(t {_id:'{tribe_id}'})
+          |CREATE [u]-[r:MEMBER_OF]->[t]
+        """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
-    case MembersAcceptedEvent(_, tribe_id, user_id) =>
+    case MembersRemovedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH (u {_id:'${membersAccepted.user_id}'})-[r1]->(t {_id:'${membersAccepted.tribe_id}'})
-           |CREATE [u]-[r2:MEMBER_OF]->[t]
-           |DELETE r1
-         """).on(("tribe_id", tribe_id), ("user_id", user_id))
+        """MATCH (u {_id:'{_id'})-[r]->(t {_id:'{tribe_id}'})
+          |DELETE r
+        """).on(("_id", _id), ("tribe_id", tribe_id))
+        .execute()(conn)
+
+    //Analytics
+    case AnalyticsPageViewEvent(_, _id, partup_id) =>
+      Cypher(
+        """MATCH (u {_id:'{_id}'},
+          |(p {partup_id:'{'partup_id}'}),
+          |(u)-[r]->(p)
+          |SET r.pageViews=r.pageViews+1
+        """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
   }
 

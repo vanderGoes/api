@@ -21,7 +21,7 @@ case class PartupsRemovedEvent(timestamp: String, _id: String)
   extends Event(timestamp, "partups.removed")
 
 //Tribes
-case class TribesInsertedEvent(timestamp: String, _id: String, name: String, network_id: String, admin_id: String)
+case class TribesInsertedEvent(timestamp: String, _id: String, name: String, tribe_id: String, admin_id: String)
   extends Event(timestamp, "tribes.inserted")
 
 case class TribesUpdatedEvent(timestamp: String, _id: String, name: String)
@@ -44,29 +44,29 @@ case class UsersChangedEvent(timestamp: String, _id: String, name: String)
   extends Event(timestamp, "users.changed")
 
 //Partners
-case class PartnersInsertedEvent(timestamp: String, partup_id: String, user_id: String)
+case class PartnersInsertedEvent(timestamp: String, _id: String, partup_id: String)
   extends Event(timestamp, "partups.uppers.inserted")
 
 //Supporters
-case class SupportersInsertedEvent(timestamp: String, partup_id: String, user_id: String)
+case class SupportersInsertedEvent(timestamp: String, _id: String, partup_id: String)
   extends Event(timestamp, "supporters.inserted")
 
-case class SupportersRemovedEvent(timestamp: String, partup_id: String, user_id: String)
+case class SupportersRemovedEvent(timestamp: String, _id: String, partup_id: String)
   extends Event(timestamp, "supporters.removed")
 
-//Invitation
-case class PartupsInvitedEvent(timestamp: String, partup_id: String, user_id: String)
-  extends Event(timestamp, "invites.inserted.partup")
-
 //Members
-case class MembersInvitedEvent(timestamp: String, tribe_id:String, user_id: String)
-  extends Event(timestamp, "invites.inserted.network")
-
-case class MembersPendingEvent(timestamp: String, tribe_id: String, user_id: String)
-  extends Event(timestamp, "networks.new_pending_upper")
-
-case class MembersAcceptedEvent(timestamp: String, tribe_id: String, user_id:String)
+case class MembersAcceptedEvent(timestamp: String, _id: String, tribe_id: String)
   extends Event(timestamp, "networks.accepted")
+
+case class MembersInsertedEvent(timestamp: String, _id: String, tribe_id: String)
+  extends Event(timestamp, "networks.accepted")
+
+case class MembersRemovedEvent(timestamp: String, _id: String, tribe_id:String)
+  extends Event(timestamp, "networks.uppers.remove")
+
+//Analytics
+case class AnalyticsPageViewEvent(timestamp: String, _id: String, partup_id: String)
+  extends Event(timestamp, "partups.analytics.click")
 
 object MyJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val colorFormat = jsonFormat3(RawEvent)
