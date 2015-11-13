@@ -4,8 +4,8 @@ import akka.actor.Actor
 import org.anormcypher.{Neo4jREST, _}
 
 /**
- * Updates the graph database based on the events received from Meteor
- */
+  * Updates the graph database based on the events received from Meteor
+  */
 class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
   override def receive = {
@@ -238,6 +238,13 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         """MATCH (u:User {_id:'{_id}'})-[r]->(p:Partner {_id:'{partup_id}'})
           |SET r.comments=r.comments+1
         """).on(("_id", _id), ("partup_id", partup_id))
+        .execute()(conn)
+  }
+
+  override def receive = {
+    case PartupCreatedEvent(_, name, id, _) =>
+      Cypher("CREATE (n:partup{name:'{name}', id:'{id}'})")
+        .on(("name", name), ("id", id))
         .execute()(conn)
   }
 

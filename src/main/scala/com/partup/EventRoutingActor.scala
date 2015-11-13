@@ -2,6 +2,7 @@ package com.partup
 
 import akka.actor.{Actor, Props}
 import spray.json.DefaultJsonProtocol._
+import spray.json.{JsValue, _}
 
 /**
   * Unpacks RawEvents and sends them to the proper receiver.
