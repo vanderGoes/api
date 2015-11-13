@@ -10,39 +10,79 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
   override def receive = {
     //Part-ups
-    case PartupsInsertedEvent(_, creator_id, _id, name, network_id) =>
+    case PartupsInsertedEvent(_, creator_id, _id, name, language, place_id, country, network_id, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase) =>
       if(network_id != null){
         Cypher(
-          """MATCH (u {_id:'{creator_id}'},
+          """MATCH (u {_id:'{creator_id}'}),
             |(t {_id: '{network_id}'})
             |CREATE (p:partup {_id:'{_id}',
-            |name:'{name}'}),
+            |name:'{name}',
+            |language:'{language}',
+            |place_id:'{place_id}',
+            |country:'{country}',
+            |privacy_type:'{privacy_type}',
+            |activity_count:'{activity_count}',
+            |progress:'{progress}',
+            |type_partup:'{type_partup}',
+            |type_com_budget:'{type_com_budget}',
+            |type_org_budget:'{type_org_budget}',
+            |phase:'{phase}'}),
             |(u)-[:CREATOR_OF]->(p),
             |(t)-[:PART_OF]->(p)
-          """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("network_id", network_id))
+          """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
           .execute()(conn)
       }else{
         Cypher(
-          """MATCH (u {_id:'{creator_id}'}
+          """MATCH (u {_id:'{creator_id}'})
             |CREATE (p:partup {_id:'{_id}',
-            |name:'{name}'}),
+            |name:'{name}',
+            |language:'{language}',
+            |place_id:'{place_id}',
+            |country:'{country}',
+            |privacy_type:'{privacy_type}',
+            |activity_count:'{activity_count}',
+            |progress:'{progress}',
+            |type_partup:'{type_partup}',
+            |type_com_budget:'{type_com_budget}',
+            |type_org_budget:'{type_org_budget}',
+            |phase:'{phase}'}),
             |(u)-[:CREATOR_OF]->(p)
-          """).on(("creator_id", creator_id), ("_id", _id), ("name", name))
+          """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
           .execute()(conn)
       }
 
-    case PartupsUpdatedEvent(_, _id, name) =>
+    case PartupsUpdatedEvent(_, _id, name, language, place_id, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase) =>
       Cypher(
         """MATCH (p {_id:'{_id}'})
-           |SET p.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET p.name:'{name}',
+           |p.language:'{language}',
+           |p.place_id:'{place_id}',
+           |p.country:'{country}',
+           |p.privacy_type:'{privacy_type}',
+           |p.activity_count:'{activity_count}',
+           |p.progress:'{progress}',
+           |p.type_partup:'{type_partup}',
+           |p.type_com_budget:'{type_com_budget}',
+           |p.type_org_budget:'{type_org_budget}',
+           |p.phase:'{phase}'
+         """).on(("_id", _id), ("name", name), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
         .execute()(conn)
 
-    case PartupsChangedEvent(_, _id, name) =>
+    case PartupsChangedEvent(_, _id, name, language, place_id, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase) =>
       Cypher(
         """MATCH (p {_id:'{_id}'})
-           |SET p.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET p.name:'{name}',
+           |p.language:'{language}',
+           |p.place_id:'{place_id}',
+           |p.country:'{country}',
+           |p.privacy_type:'{privacy_type}',
+           |p.activity_count:'{activity_count}',
+           |p.progress:'{progress}',
+           |p.type_partup:'{type_partup}',
+           |p.type_com_budget:'{type_com_budget}',
+           |p.type_org_budget:'{type_org_budget}',
+           |p.phase:'{phase}'
+         """).on(("_id", _id), ("name", name), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
         .execute()(conn)
 
     case PartupsRemovedEvent(_, _id) =>
@@ -53,27 +93,30 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Tribes
-    case TribesInsertedEvent(_, _id, name, network_id, admin_id) =>
+    case TribesInsertedEvent(_, _id, name, privacy_type, admin_id) =>
       Cypher(
         """MATCH (u {_id:'{admin_id}'})
            |CREATE (t:tribe {_id:'{_id}',
-           |name:'{name}'}),
+           |name:'{name}',
+           |privacy_type:'{privacy_type}'}),
            |(u)-[:ADMIN_OF]->(t)
-         """).on(("_id", _id), ("name", name), ("network_id", network_id), ("admin_id", admin_id))
+         """).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("admin_id", admin_id))
         .execute()(conn)
 
-    case TribesUpdatedEvent(_, _id, name) =>
+    case TribesUpdatedEvent(_, _id, name, privacy_type) =>
       Cypher(
         """MATCH (t {_id:'{_id}'})
-           |SET t.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET t.name:'{name}',
+           |t.privacy_type:'{privacy_type}'
+         """).on(("_id", _id), ("name", name), ("privacy_type", privacy_type))
         .execute()(conn)
 
-    case TribesChangedEvent(_, _id, name) =>
+    case TribesChangedEvent(_, _id, name, privacy_type) =>
       Cypher(
         """MATCH (t {_id:'{_id}'})
-           |SET t.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET t.name:'{name}',
+           |t.privacy_type:'{privacy_type}'
+         """).on(("_id", _id), ("name", name), ("privacy_type", privacy_type))
         .execute()(conn)
 
     case TribesRemovedEvent(_, _id) =>
@@ -84,32 +127,38 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Users
-    case UsersInsertedEvent(_, _id, name) =>
+    case UsersInsertedEvent(_, _id, name, place_id, country) =>
       Cypher(
         """CREATE (u:user {_id:'{_id}',
-           |name:'{name}')
-         """).on(("_id", _id), ("name", name))
+           |name:'{name}',
+           |place_id:'{place_id}',
+           |country:'{country}'})
+         """).on(("_id", _id), ("name", name), ("place_id", place_id), ("country", country))
         .execute()(conn)
 
-    case UsersUpdatedEvent(_, _id, name) =>
+    case UsersUpdatedEvent(_, _id, name, place_id, country) =>
       Cypher(
         """MATCH (u {_id:'{_id}'})
-           |SET u.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET u.name:'{name}',
+           |u.place_id:'{place_id}',
+           |u.country:'{country}'
+         """).on(("_id", _id), ("name", name), ("place_id", place_id), ("country", country))
         .execute()(conn)
 
-    case UsersChangedEvent(_, _id, name) =>
+    case UsersChangedEvent(_, _id, name, place_id, country) =>
       Cypher(
         """MATCH (u {_id:'{_id}'})
-           |SET u.name:'{name}'
-         """).on(("_id", _id), ("name", name))
+           |SET u.name:'{name}',
+           |u.place_id:'{place_id}',
+           |u.country:'{country}'
+         """).on(("_id", _id), ("name", name), ("place_id", place_id), ("country", country))
         .execute()(conn)
 
     //Partners
     case PartnersInsertedEvent(_, _id, partup_id) =>
       Cypher(
         """MATCH (u {_id:'{_id}'),
-           |(p {_id:'{partup_id}'})           |
+           |(p {_id:'{partup_id}'})
            |OPTIONAL MATCH (u)-[r:SUPPORTER_OF]->(p)
            |CREATE (u)-[z:PARTNER_IN]->(p)
            |SET u.temp_pv = r.pageViews
@@ -161,9 +210,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Analytics
     case AnalyticsPageViewEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u {_id:'{_id}'},
-          |(p {partup_id:'{'partup_id}'}),
-          |(u)-[r]->(p)
+        """MATCH (u {_id:'{_id}'}-[r]->(p {partup_id:'{'partup_id}'}),
           |SET r.pageViews=r.pageViews+1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)

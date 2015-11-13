@@ -17,9 +17,20 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
           val network_id = partup("network_id").convertTo[String]
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val progress = partup("progress").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
+          val type_org_budget = partup("type_organization_budget").convertTo[Int]
+          val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, network_id)
+          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, language, place_id, country, network_id, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -29,8 +40,19 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val progress = partup("progress").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
+          val type_org_budget = partup("type_organization_budget").convertTo[Int]
+          val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name)
+          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, language, place_id, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -40,8 +62,19 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val progress = partup("progress").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
+          val type_org_budget = partup("type_organization_budget").convertTo[Int]
+          val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name)
+          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, language, place_id, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -62,21 +95,22 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val tribe_id = tribe("network_id").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[String]
           val admin_id = tribe("admin_id").convertTo[String]
 
-          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, tribe_id, admin_id)
+          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
         case "tribes.updated" =>
           val payload = event.payload.asJsObject.fields
           val userID = payload("0").convertTo[String]
-          val tribes = payload("1").asJsObject.fields
-          val _id = tribes("_id").convertTo[String]
-          val name = tribes("name").convertTo[String]
+          val tribe = payload("1").asJsObject.fields
+          val _id = tribe("_id").convertTo[String]
+          val name = tribe("name").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[String]
 
-          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name)
+          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -86,8 +120,9 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[String]
 
-          val createdEvent = TribesChangedEvent(event.timestamp, _id, name)
+          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -109,8 +144,11 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
 
-          val createdEvent = UsersInsertedEvent(event.timestamp, _id, name)
+          val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, place_id, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -121,8 +159,11 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
 
-          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name)
+          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, place_id, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -133,8 +174,11 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = location("place_id").convertTo[String]
+          val country = location("country").convertTo[String]
 
-          val createdEvent = UsersChangedEvent(event.timestamp, _id, name)
+          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, place_id, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -182,7 +226,7 @@ class EventRoutingActor extends Actor {
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        case "network.uppers.inserted" =>
+        case "networks.uppers.inserted" =>
           val payload = event.payload.asJsObject.fields
           val _id = payload("0").convertTo[String]
           val tribe_id = payload("1").convertTo[String]
