@@ -287,6 +287,20 @@ class EventRoutingActor extends Actor {
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
+        //Ratings
+        case "partups.contributions.ratings.inserted" =>
+          val payload = event.payload.asJsObject.fields
+          val user = payload("0").asJsObject.fields
+          val _id = user("id").convertTo[String]
+          val contribution = payload("1").asJsObject.fields
+          val user_id = contribution("rated_upper_id").convertTo[String]
+          val partup_id = contribution("partup_id").convertTo[String]
+          val rating = contribution("rating").convertTo[Int]
+
+          val createdEvent = RatingsInsertedEvent(event.timestamp, _id, user_id, partup_id, rating)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
         case _ =>
         // Not routing events I don't know
       }

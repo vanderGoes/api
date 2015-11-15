@@ -28,7 +28,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
             |type_com_budget:{type_com_budget},
             |type_org_budget:{type_org_budget},
             |phase:'{phase}'}),
-            |(u)-[:CREATOR_IN]->(p),
+            |(u)-[:CREATOR_OF]->(p),
             |(p)-[:PART_OF]->(t)
           """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
           .execute()(conn)
@@ -235,16 +235,17 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Comments
     case CommentsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r]->(p:Partner {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r]->(p:Partup {_id:'{partup_id}'})
           |SET r.comments=r.comments+1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
-  }
 
-  override def receive = {
-    case PartupCreatedEvent(_, name, id, _) =>
-      Cypher("CREATE (n:partup{name:'{name}', id:'{id}'})")
-        .on(("name", name), ("id", id))
+    //Ratings
+    case RatingsInsertedEvent(_, _, user_id, partup_id, rating) =>
+      Cypher(
+        """MATCH (u:User {_id:'{user_id}'})-[r:PARTNER_IN]->(p:Partup {_id:'{partup_id}'})
+          |SET r.ratings=r.ratings+['{rating}']
+        """).on(("user_id", user_id), ("partup_id", partup_id), ("rating", rating))
         .execute()(conn)
   }
 

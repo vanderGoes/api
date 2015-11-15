@@ -76,6 +76,10 @@ case class ContributionsInsertedEvent(timestamp: String, _id: String, partup_id:
 case class CommentsInsertedEvent(timestamp: String, _id: String, partup_id: String)
   extends Event(timestamp, "updates.comments.inserted")
 
+//Ratings
+case class RatingsInsertedEvent(timestamp: String, _id:String, user_id: String, partup_id: String, rating: Int)
+  extends Event(timestamp, "partups.contributions.ratings.inserted")
+
 object MyJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val colorFormat = jsonFormat3(RawEvent)
 }
