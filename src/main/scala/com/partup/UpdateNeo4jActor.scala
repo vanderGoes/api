@@ -17,7 +17,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
             |MERGE (n:Network {_id: '{network_id}'})
             |MERGE (ci:City {_id: '{place_id}'})
             |ON CREATE SET ci.name: '{city}'
-            |MERGE (co:Country {_id: '{country}'})
+            |MERGE (co:Country {name: '{country}'})
             |MERGE (t:Team {_id:'{_id}'})
             |SET t.name:'{name}',
             |t.tags:[{tags}],
@@ -40,7 +40,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
           """MERGE (u:User {_id:'{creator_id}'})
             |MERGE (ci:City {_id: '{place_id}'})
             |ON CREATE SET ci.name: '{city}'
-            |MERGE (co:Country {_id: '{country}'})
+            |MERGE (co:Country {name: '{country}'})
             |MERGE (t:Team {_id:'{_id}'})
             |SET t.name:'{name}',
             |t.tags:[{tags}],
@@ -63,7 +63,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
           |ON CREATE SET ci.name: '{city}'
-          |MERGE (co:Country {_id: '{country}'})
+          |MERGE (co:Country {name: '{country}'})
           |MERGE (t:Team {_id:'{_id}'})
           |SET t.name='{name}',
           |t.tags=[{tags}],
@@ -86,7 +86,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
           |ON CREATE SET ci.name: '{city}'
-          |MERGE (co:Country {_id: '{country}'})
+          |MERGE (co:Country {name: '{country}'})
           |MERGE (t:Team {_id:'{_id}'})
           |SET t.name='{name}',
           |t.tags=[{tags}],
@@ -118,7 +118,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         """MERGE (u:User {_id:'{admin_id}'})
           |MERGE (ci:City {_id: '{place_id}'})
           |ON CREATE SET ci.name: '{city}'
-          |MERGE (co:Country {_id: '{country}'})
+          |MERGE (co:Country {name: '{country}'})
           |MERGE (n:Network {_id:'{_id}'})
           |SET n.name:'{name}',
           |n.privacy_type:'{privacy_type}'}),
@@ -132,7 +132,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
           |ON CREATE SET ci.name: '{city}'
-          |MERGE (co:Country {_id: '{country}'})
+          |MERGE (co:Country {name: '{country}'})
           |MERGE (n:Network {_id:'{_id}'})
           |SET n.name='{name}',
           |n.privacy_type='{privacy_type}'
@@ -145,7 +145,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
           |ON CREATE SET ci.name: '{city}'
-          |MERGE (co:Country {_id: '{country}'})
+          |MERGE (co:Country {name: '{country}'})
           |MERGE (n:Network {_id:'{_id}'})
           |SET n.name='{name}',
           |n.privacy_type='{privacy_type}'
@@ -166,11 +166,9 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
            |ON CREATE SET ci.name: '{city}'
-           |MERGE (co:Country {_id: '{country}'})
+           |MERGE (co:Country {name: '{country}'})
            |MERGE (u:User {_id:'{_id}'})
            |SET u.name='{name}',
-           |u.place_id='{place_id}',
-           |u.country='{country}',
            |u.tags=[{tags}]
            |CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
            |(ci)-[:LOCATED_IN]->(co)
@@ -181,11 +179,9 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
            |ON CREATE SET ci.name: '{city}'
-           |MERGE (co:Country {_id: '{country}'})
+           |MERGE (co:Country {name: '{country}'})
            |MERGE (u:User {_id:'{_id}'})
            |SET u.name='{name}',
-           |u.place_id='{place_id}',
-           |u.country='{country}',
            |u.tags=[{tags}]
            |CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
            |(ci)-[:LOCATED_IN]->(co)
@@ -196,11 +192,9 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MERGE (ci:City {_id: '{place_id}'})
            |ON CREATE SET ci.name: '{city}'
-           |MERGE (co:Country {_id: '{country}'})
+           |MERGE (co:Country {name: '{country}'})
            |MERGE (u:User {_id:'{_id}'})
            |SET u.name='{name}',
-           |u.place_id='{place_id}',
-           |u.country='{country}',
            |u.tags=[{tags}]
            |CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
            |(ci)-[:LOCATED_IN]->(co)
@@ -256,7 +250,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     case MembersRemovedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id'})-[r:MEMBER_IN]->(n:Network {_id:'{tribe_id}'})
+        """MATCH (u:User {_id:'{_id'})-[r]->(n:Network {_id:'{tribe_id}'})
           |DELETE r
           |CREATE (u)-[:NON_MEMBER_IN]->(n)
         """).on(("_id", _id), ("tribe_id", tribe_id))
@@ -273,14 +267,14 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Contributions
     case ContributionsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r]->(t:Team {_id:'{partup_id}'})
           |SET r.contributions=r.contributions+1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case ContributionsRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r]->(t:Team {_id:'{partup_id}'})
           |SET r.contributions=r.contributions-1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
