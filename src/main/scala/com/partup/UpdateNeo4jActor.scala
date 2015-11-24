@@ -29,7 +29,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
             |t.type_com_budget:{type_com_budget},
             |t.type_org_budget:{type_org_budget},
             |t.phase:'{phase}'
-            |CREATE UNIQUE (u)-[:CREATOR_OF]->(t),
+            |CREATE UNIQUE (u)-[:PARTNER_IN {creator:true}]->(t),
             |(t)-[:PART_OF]->(n),
             |(t)-[:LOCATED_IN]->(ci),
             |(ci)-[:LOCATED_IN]->(co)
@@ -52,7 +52,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
             |t.type_com_budget:{type_com_budget},
             |t.type_org_budget:{type_org_budget},
             |t.phase:'{phase}'
-            |CREATE UNIQUE (u)-[:CREATOR_OF]->(t),
+            |CREATE UNIQUE (u)-[:PARTNER_IN {creator:true}]->(t),
             |(t)-[:LOCATED_IN]->(ci),
             |(ci)-[:LOCATED_IN]->(co)
           """).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("country", country), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
@@ -122,7 +122,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
           |MERGE (n:Network {_id:'{_id}'})
           |SET n.name:'{name}',
           |n.privacy_type:'{privacy_type}'}),
-          |CREATE UNIQUE (u)-[:ADMIN_IN]->(n),
+          |CREATE UNIQUE (u)-[:MEMBER_OF {admin:true}]->(n),
           |(n)-[:LOCATED_IN]->(ci),
           |(ci)-[:LOCATED_IN]->(co)
         """).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("admin_id", admin_id), ("place_id", place_id), ("city", city), ("country", country))
@@ -267,14 +267,14 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Contributions
     case ContributionsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
           |SET r.contributions=r.contributions+1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case ContributionsRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
           |SET r.contributions=r.contributions-1
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
