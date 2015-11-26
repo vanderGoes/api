@@ -18,15 +18,18 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
           |SET u.name='{name}',
-          |u.language='{language}',
-          |u.tags=[{tags}]""".stripMargin
+          |u.language='{language}'""".stripMargin
+      val query_set_tags = "SET u.tags="
+      for (tag <- tags) {
+        query_set_tags + " + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_user + {
+      } + query_me_user + query_set_tags + {
         if (place_id != null)
           query_cu_location
       }
@@ -39,15 +42,18 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
           |SET u.name='{name}',
-          |u.language='{language}',
-          |u.tags=[{tags}]""".stripMargin
+          |u.language='{language}'""".stripMargin
+      val query_set_tags = "SET u.tags="
+      for (tag <- tags) {
+      query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_user + {
+      } + query_me_user + query_set_tags + {
         if (place_id != null)
           query_cu_location
       }
@@ -60,15 +66,18 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
           |SET u.name='{name}',
-          |u.language='{language}',
-          |u.tags=[{tags}]""".stripMargin
+          |u.language='{language}'""".stripMargin
+      val query_set_tags = "SET u.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_user + {
+      } + query_me_user + query_set_tags + {
         if (place_id != null)
           query_cu_location
       }
@@ -155,12 +164,15 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                   |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_team = """MERGE (t:Team {_id:'{_id}'})
                              |SET t.name='{name}',
-                             |t.tags=[{tags}],
                              |t.language='{language}',
                              |t.privacy_type={privacy_type},
                              |t.type_partup='{type_partup}',
                              |t.phase='{phase}'
                              |CREATE UNIQUE (u)-[:PARTNER_IN {creator:true}]->(t)""".stripMargin
+      val query_set_tags = "SET t.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_network = "CREATE UNIQUE (t)-[:PART_OF]->(n)"
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
             |(ci)-[:LOCATED_IN]->(co)""".stripMargin
@@ -171,7 +183,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     } + {
       if (place_id != null)
         query_me_location
-    } + query_me_team + {
+    } + query_me_team + query_set_tags + {
       if (network_id != null)
         query_cu_network
     } + {
@@ -187,18 +199,21 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_team = """MERGE (t:Team {_id:'{_id}'})
                               |SET t.name='{name}',
-                              |t.tags=[{tags}],
                               |t.language='{language}',
                               |t.privacy_type={privacy_type},
                               |t.type_partup='{type_partup}',
                               |t.phase='{phase}'""".stripMargin
+      val query_set_tags = "SET t.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_team + {
+      } + query_me_team + query_set_tags + {
         if (place_id != null)
           query_cu_location
       }
@@ -211,18 +226,21 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_team ="""MERGE (t:Team {_id:'{_id}'})
                           |SET t.name='{name}',
-                          |t.tags=[{tags}],
                           |t.language='{language}',
                           |t.privacy_type={privacy_type},
                           |t.type_partup='{type_partup}',
                           |t.phase='{phase}'""".stripMargin
+      val query_set_tags = "SET t.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_team + {
+      } + query_me_team +query_set_tags + {
         if (place_id != null)
           query_cu_location
       }
