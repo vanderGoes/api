@@ -11,7 +11,46 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
   override def receive = {
     //Teams
     case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase) =>
-      if (network_id != null) {
+
+      val query_me_user = "MERGE (u:User {_id:'{creator_id}'})"
+      val query_me_network = "MERGE (n:Network {_id: '{network_id}'})"
+      val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
+            |ON CREATE SET ci.name: '{city}'
+            |MERGE (co:Country {name: '{country}'})""".stripMargin
+      val query_me_team =
+        """MERGE (t:Team {_id:'{_id}'})
+           |SET t.name:'{name}',
+           |t.tags:[{tags}],
+           |t.language:'{language}',
+           |t.privacy_type:{privacy_type},
+           |t.activity_count:{activity_count},
+           |t.progress:{progress},
+           |t.type_partup:'{type_partup}',
+           |t.type_com_budget:{type_com_budget},
+           |t.type_org_budget:{type_org_budget},
+           |t.phase:'{phase}'
+           |CREATE UNIQUE (u)-[:PARTNER_IN {creator:true}]->(t)""".stripMargin
+      val query_cu_network = "(t)-[:PART_OF]->(n)"
+      val query_cu_location = """CREATE UNIQUE(t)-[:LOCATED_IN]->(ci),
+            |(ci)-[:LOCATED_IN]->(co)""".stripMargin
+
+    val query = query_me_user + {
+      if (network_id != null)
+        query_me_network
+    } + {
+      if (place_id != null)
+        query_me_location
+    } + query_me_team + {
+      if (network_id != null)
+        query_cu_network
+    } + {
+      if (place_id != null)
+        query_cu_location
+    }
+      Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("activity_count", activity_count), ("progress", progress), ("type_partup", type_partup), ("type_com_budget", type_com_budget), ("type_org_budget", type_org_budget), ("phase", phase))
+        .execute()(conn)
+
+    if (network_id != null) {
         Cypher(
           """MERGE (u:User {_id:'{creator_id}'})
             |MERGE (n:Network {_id: '{network_id}'})
