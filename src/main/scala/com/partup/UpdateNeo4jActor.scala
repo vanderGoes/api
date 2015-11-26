@@ -23,8 +23,8 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       for (tag <- tags) {
         query_set_tags + " + ['" + tag + "']" -> query_set_tags
       }
-      val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
-                                |(ci)-[:LOCATED_IN]->(co)""".stripMargin
+      val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
+                                |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
@@ -47,8 +47,8 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       for (tag <- tags) {
       query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
-      val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
-                                |(ci)-[:LOCATED_IN]->(co)""".stripMargin
+      val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
+                                |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
@@ -71,8 +71,8 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
-      val query_cu_location = """CREATE UNIQUE (u)-[:LOCATED_IN]->(ci),
-                                |(ci)-[:LOCATED_IN]->(co)""".stripMargin
+      val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
+                                |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
@@ -91,7 +91,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_network = """MERGE (n:Network {_id:'{_id}'})
-                              |SET n.name:'{name}',
+                              |SET n.name='{name}',
                               |n.privacy_type:'{privacy_type}'})
                               |CREATE UNIQUE (u)-[:MEMBER_OF {admin:true}]->(n)""".stripMargin
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
@@ -112,7 +112,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_network = """MERGE (n:Network {_id:'{_id}'})
-                               |SET n.name:'{name}',
+                               |SET n.name='{name}',
                                |n.privacy_type:'{privacy_type}'})""".stripMargin
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
@@ -132,7 +132,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_network = """MERGE (n:Network {_id:'{_id}'})
-                               |SET n.name:'{name}',
+                               |SET n.name='{name}',
                                |n.privacy_type:'{privacy_type}'})""".stripMargin
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
@@ -175,7 +175,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       }
       val query_cu_network = "CREATE UNIQUE (t)-[:PART_OF]->(n)"
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
-            |(ci)-[:LOCATED_IN]->(co)""".stripMargin
+                                |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
     val query = query_me_user + {
       if (network_id != null)
@@ -225,11 +225,11 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_team ="""MERGE (t:Team {_id:'{_id}'})
-                          |SET t.name='{name}',
-                          |t.language='{language}',
-                          |t.privacy_type={privacy_type},
-                          |t.type_partup='{type_partup}',
-                          |t.phase='{phase}'""".stripMargin
+                            |SET t.name='{name}',
+                            |t.language='{language}',
+                            |t.privacy_type={privacy_type},
+                            |t.type_partup='{type_partup}',
+                            |t.phase='{phase}'""".stripMargin
       val query_set_tags = "SET t.tags="
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
@@ -261,7 +261,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         """MATCH (u:User {_id:'{_id}'),
            |(t:Team {_id:'{partup_id}'})
            |OPTIONAL MATCH (u)-[r:SUPPORTER_IN]->(t)
-           |CREATE (u)-[:PARTNER_IN {pageViews: r.pageViews, contributions:1}]->(t)
+           |CREATE UNIQUE (u)-[:PARTNER_IN {comments:0, contributions:1, pageViews: r.pageViews, ratings:[]}]->(t)
            |DELETE r
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -269,11 +269,11 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Supporters
     case SupportersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """Match (u:User {_id:'{_id}'),
+        """MATCH (u:User {_id:'{_id}'),
            |(t:Team {_id:'{partup_id}'})
            |OPTIONAL MATCH (u)-[r:NON_SUPPORTER_IN]->(t)
            |DELETE r
-           |CREATE (u)-[:SUPPORTER_IN]->(t)
+           |CREATE UNIQUE (u)-[:SUPPORTER_IN]->(t)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
@@ -281,24 +281,24 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (u:User {_id:'{_id}'})-[r:SUPPORTER_IN]->(t:Team {_id:'{partup_id}'})
            |DELETE r
-           |CREATE (u)-[:NON_SUPPORTER_IN]->(t)
+           |CREATE UNIQUE (u)-[:NON_SUPPORTER_IN]->(t)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Members
     case MembersAcceptedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'}),
-          |(n:Network {_id:'{tribe_id}'})
-          |CREATE (u)-[:MEMBER_IN]->(t)
+        """MERGE (u:User {_id:'{_id}'})
+          |MERGE (n:Network {_id:'{tribe_id}'})
+          |CREATE UNIQUE (u)-[:MEMBER_OF]->(t)
         """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
     case MembersInsertedEvent(_, _id, tribe_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'}),
-          |(n:Network {_id:'{tribe_id}'})
-          |CREATE (u)-[:MEMBER_IN]->(n)
+        """MERGE (u:User {_id:'{_id}'})
+          |MERGE (n:Network {_id:'{tribe_id}'})
+          |CREATE UNIQUE (u)-[:MEMBER_OF]->(n)
         """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
@@ -306,7 +306,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (u:User {_id:'{_id'})-[r]->(n:Network {_id:'{tribe_id}'})
           |DELETE r
-          |CREATE (u)-[:NON_MEMBER_IN]->(n)
+          |CREATE UNIQUE (u)-[:NON_MEMBER_OF]->(n)
         """).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
