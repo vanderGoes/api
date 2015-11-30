@@ -20,13 +20,13 @@ case class UsersChangedEvent(timestamp: String, _id: String, name: String, langu
 
 
 //Networks
-case class TribesInsertedEvent(timestamp: String, _id: String, name: String, privacy_type: String, admin_id: String, place_id: String, city: String, country: String)
+case class TribesInsertedEvent(timestamp: String, _id: String, name: String, privacy_type: Int, admin_id: String, language: String, place_id: String, city: String, country: String)
   extends Event(timestamp, "tribes.inserted")
 
-case class TribesUpdatedEvent(timestamp: String, _id: String, name: String, privacy_type: String, place_id: String, city: String, country: String)
+case class TribesUpdatedEvent(timestamp: String, _id: String, name: String, privacy_type: Int, language: String, place_id: String, city: String, country: String)
   extends Event(timestamp, "tribes.updated")
 
-case class TribesChangedEvent(timestamp: String, _id: String, name: String, privacy_type: String, place_id: String, city: String, country: String)
+case class TribesChangedEvent(timestamp: String, _id: String, name: String, privacy_type: Int, language: String, place_id: String, city: String, country: String)
   extends Event(timestamp, "tribes.changed")
 
 case class TribesRemovedEvent(timestamp: String, _id: String)

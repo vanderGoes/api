@@ -122,8 +122,9 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
           val admin_id = tribe("admin_id").convertTo[String]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
             if (location != null)
@@ -144,7 +145,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, place_id, city, country)
+          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, language, place_id, city, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -154,7 +155,8 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
             if (location != null)
@@ -175,7 +177,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, place_id, city, country)
+          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -185,7 +187,8 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
             if (location != null)
@@ -206,7 +209,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, place_id, city, country)
+          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
