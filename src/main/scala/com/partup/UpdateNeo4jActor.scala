@@ -12,80 +12,110 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     //NODES
     //Users
-    case UsersInsertedEvent(_, _id, name, language, place_id, country, tags) =>
+    case UsersInsertedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
           |SET u.name='{name}',
+          |u.email='{email}',
           |u.language='{language}'""".stripMargin
-      val query_set_tags = "SET u.tags="
-      for (tag <- tags) {
-        query_set_tags + " + ['" + tag + "']" -> query_set_tags
-      }
+
+      // SET u.tags=[ '2342' ,321,121,21112]
+
+      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
+
+      val query_set_tags = s"SET u.tags=[$tagsAsString]"
+
+      val query_deactivated = """SET u.deactivatedAt={deactivatedAt},
+                                |u.active=false """.stripMargin
+
       val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
                                 |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
-        if (place_id != null)
-          query_me_location
-      } + query_me_user + query_set_tags + {
-        if (place_id != null)
-          query_cu_location
+          if (place_id != null)
+            query_me_location } +
+        query_me_user + {
+          if (tags!=null)
+            query_set_tags } + {
+          if (deactivatedAt != null)
+            query_deactivated } + {
+          if (place_id != null)
+            query_cu_location
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
+      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("deactivatedAt", deactivatedAt), ("place_id", place_id), ("country", country), ("tags", tags))
         .execute()(conn)
 
-    case UsersUpdatedEvent(_, _id, name, language, place_id, country, tags) =>
+    case UsersUpdatedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
                               |SET u.name='{name}',
+                              |u.email='email',
                               |u.language='{language}'""".stripMargin
       val query_set_tags = "SET u.tags="
       for (tag <- tags) {
       query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
+
+      val query_deactivated = """SET u.deactivatedAt={deactivatedAt},
+                                |u.active=false """.stripMargin
+
       val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
                                 |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
-          query_me_location
-      } + query_me_user + query_set_tags + {
+          query_me_location } +
+        query_me_user + {
+        if (tags!=null)
+          query_set_tags } + {
+        if (deactivatedAt != null)
+          query_deactivated } + {
         if (place_id != null)
           query_cu_location
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
+      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
         .execute()(conn)
 
-    case UsersChangedEvent(_, _id, name, language, place_id, country, tags) =>
+    case UsersChangedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
       val query_me_user = """MERGE (u:User {_id:'{_id}'})
                               |SET u.name='{name}',
+                              |u.email='{email}',
                               |u.language='{language}'""".stripMargin
+
       val query_set_tags = "SET u.tags="
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
+
+      val query_deactivated = """SET u.deactivatedAt={deactivatedAt},
+                                |u.active=false """.stripMargin
+
       val query_cu_location = """CREATE UNIQUE (u)-[:LIVES_IN]->(ci),
                                 |(ci)-[:LIVES_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
-          query_me_location
-      } + query_me_user + query_set_tags + {
+          query_me_location } +
+        query_me_user + {
+        if (tags!=null)
+          query_set_tags } + {
+        if (deactivatedAt != null)
+          query_deactivated } + {
         if (place_id != null)
-          query_cu_location
-      }
-      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
+          query_cu_location }
+
+      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
         .execute()(conn)
 
     //Networks
-    case TribesInsertedEvent(_, _id, name, privacy_type, admin_id, language, place_id, city, country) =>
+    case TribesInsertedEvent(_, _id, name, privacy_type, admin_id, language, place_id, city, country, tags) =>
       val query_me_user = "MERGE (u:User {_id:'{admin_id}'})"
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
@@ -95,6 +125,10 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                               |n.language='{language}',
                               |n.privacy_type:{privacy_type}
                               |CREATE UNIQUE (u)-[:MEMBER_OF {admin:true}]->(n)""".stripMargin
+      val query_set_tags = "SET n.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
@@ -102,13 +136,15 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (place_id != null)
           query_me_location
       } + query_me_network + {
+        if (tags != null)
+          query_set_tags } + {
         if (place_id != null)
-          query_cu_location
-      }
-      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("admin_id", admin_id), ("language", language), ("place_id", place_id), ("city", city), ("country", country))
+          query_cu_location }
+
+      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("admin_id", admin_id), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("tags", tags))
         .execute()(conn)
 
-    case TribesUpdatedEvent(_, _id, name, privacy_type, language, place_id, city, country) =>
+    case TribesUpdatedEvent(_, _id, name, privacy_type, language, place_id, city, country, tags) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
@@ -116,6 +152,10 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                |SET n.name='{name}',
                                |n.language='{language}',
                                |n.privacy_type:{privacy_type}""".stripMargin
+      val query_set_tags = "SET n.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
@@ -123,13 +163,15 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (place_id != null)
           query_me_location
       } + query_me_network + {
+        if (tags != null)
+          query_set_tags } + {
         if (place_id != null)
-          query_cu_location
-      }
-      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("language", language), ("place_id", place_id), ("city", city), ("country", country))
+          query_cu_location }
+
+      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("tags", tags))
         .execute()(conn)
 
-    case TribesChangedEvent(_, _id, name, privacy_type, language, place_id, city, country) =>
+    case TribesChangedEvent(_, _id, name, privacy_type, language, place_id, city, country, tags) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
@@ -137,6 +179,10 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                                |SET n.name='{name}',
                                |n.language='{language}',
                                |n.privacy_type:{privacy_type}""".stripMargin
+      val query_set_tags = "SET n.tags="
+      for (tag <- tags) {
+        query_set_tags +" + ['" + tag + "']" -> query_set_tags
+      }
       val query_cu_location = """CREATE UNIQUE (n)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
@@ -144,10 +190,12 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (place_id != null)
           query_me_location
       } + query_me_network + {
+        if (tags != null)
+          query_set_tags } + {
         if (place_id != null)
-          query_cu_location
-      }
-      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("language", language), ("place_id", place_id), ("city", city), ("country", country))
+          query_cu_location }
+
+      Cypher(query).on(("_id", _id), ("name", name), ("privacy_type", privacy_type), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("tags", tags))
         .execute()(conn)
 
     case TribesRemovedEvent(_, _id) =>
@@ -158,7 +206,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Teams
-    case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase) =>
+    case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, deactivatedAt) =>
 
       val query_me_user = "MERGE (u:User {_id:'{creator_id}'})"
       val query_me_network = "MERGE (n:Network {_id: '{network_id}'})"
@@ -171,11 +219,13 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                              |t.privacy_type={privacy_type},
                              |t.typep='{type_partup}',
                              |t.phase='{phase}'
-                             |CREATE UNIQUE (u)-[:PARTNER_IN {creator:true}]->(t)""".stripMargin
+                             |CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:0.0, ratings:[], weight:2.0}]->(t)""".stripMargin
       val query_set_tags = "SET t.tags="
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
+      val query_deactivated = """SET t.deactivatedAt={deactivatedAt},
+                                |t.active=false """.stripMargin
       val query_cu_network = "CREATE UNIQUE (t)-[:PART_OF]->(n)"
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
@@ -186,17 +236,21 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     } + {
       if (place_id != null)
         query_me_location
-    } + query_me_team + query_set_tags + {
+    } + query_me_team + {
+      if (tags != null)
+        query_set_tags } + {
+      if (deactivatedAt != null)
+        query_deactivated } + {
       if (network_id != null)
         query_cu_network
     } + {
       if (place_id != null)
         query_cu_location
     }
-      Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase))
+      Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase) =>
+    case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
@@ -210,20 +264,26 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
+      val query_deactivated = """SET t.deactivatedAt={deactivatedAt},
+                                |t.active=false """.stripMargin
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_team + query_set_tags + {
+      } + query_me_team + {
+        if (tags != null)
+          query_set_tags } + {
+        if (deactivatedAt != null)
+          query_deactivated } + {
         if (place_id != null)
           query_cu_location
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase))
+      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsChangedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase) =>
+    case PartupsChangedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'})""".stripMargin
@@ -237,17 +297,23 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       for (tag <- tags) {
         query_set_tags +" + ['" + tag + "']" -> query_set_tags
       }
+      val query_deactivated = """SET t.deactivatedAt={deactivatedAt},
+                                |t.active=false """.stripMargin
       val query_cu_location = """CREATE UNIQUE (t)-[:LOCATED_IN]->(ci),
                                 |(ci)-[:LOCATED_IN]->(co)""".stripMargin
 
       val query = {
         if (place_id != null)
           query_me_location
-      } + query_me_team +query_set_tags + {
+      } + query_me_team + {
+        if (tags != null)
+          query_set_tags } + {
+        if (deactivatedAt != null)
+          query_deactivated } + {
         if (place_id != null)
           query_cu_location
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase))
+      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
     case PartupsRemovedEvent(_, _id) =>
@@ -261,10 +327,11 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Partners
     case PartnersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'),
-           |(t:Team {_id:'{partup_id}'})
-           |OPTIONAL MATCH (u)-[r:SUPPORTER_IN]->(t)
-           |CREATE UNIQUE (u)-[:PARTNER_IN {comments:0, contributions:1, pageViews: r.pageViews, ratings:[]}]->(t)
+        """MATCH (u:User {_id:'{_id}')-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})
+           |SET r.contributions=1,
+           |r.weight=1.5,
+           |u.maxContributions=u.maxContributions+1,
+           |r.participation=r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)
            |DELETE r
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -274,17 +341,16 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(
         """MATCH (u:User {_id:'{_id}'),
            |(t:Team {_id:'{partup_id}'})
-           |OPTIONAL MATCH (u)-[r:NON_SUPPORTER_IN]->(t)
-           |DELETE r
-           |CREATE UNIQUE (u)-[:SUPPORTER_IN]->(t)
+           |CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t)
+           |SET r.weight=1.0,
+           |r.participation=r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case SupportersRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r:SUPPORTER_IN]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN {weight:0.5}]->(t:Team {_id:'{partup_id}'})
            |DELETE r
-           |CREATE UNIQUE (u)-[:NON_SUPPORTER_IN]->(t)
          """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
@@ -324,15 +390,19 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Contributions
     case ContributionsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
-          |SET r.contributions=r.contributions+1
+        """MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})
+          |SET r.contributions=r.contributions+1,
+          |u.maxContributions=u.maxContributions+1,
+          |r.participation=r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case ContributionsRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        """MATCH (u:User {_id:'{_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
-          |SET r.contributions=r.contributions-1
+        """MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})
+          |SET r.contributions=r.contributions-1,
+          |u.maxContributions=u.maxContributions-1,
+          |r.participation=r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
@@ -340,14 +410,16 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case CommentsInsertedEvent(_, _id, partup_id) =>
       Cypher(
         """MATCH (u:User {_id:'{_id}'})-[r]->(t:Team {_id:'{partup_id}'})
-          |SET r.comments=r.comments+1
+          |SET r.comments=r.comments+1,
+          |u.maxComments=u.maxComments+1,
+          |r.participation=r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)
         """).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Ratings
     case RatingsInsertedEvent(_, _, user_id, partup_id, rating) =>
       Cypher(
-        """MATCH (u:User {_id:'{user_id}'})-[r:PARTNER_IN]->(t:Team {_id:'{partup_id}'})
+        """MATCH (u:User {_id:'{user_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})
           |SET r.ratings=r.ratings+['{rating}']
         """).on(("user_id", user_id), ("partup_id", partup_id), ("rating", rating))
         .execute()(conn)

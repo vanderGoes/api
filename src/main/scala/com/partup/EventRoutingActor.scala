@@ -1,8 +1,10 @@
 package com.partup
 
+import java.text.SimpleDateFormat
+
 import akka.actor.{Actor, Props}
 import spray.json.DefaultJsonProtocol._
-import spray.json.{JsValue, _}
+import spray.json._
 
 /**
   * Unpacks RawEvents and sends them to the proper receiver.
@@ -20,6 +22,7 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
           val settings = profile("setting").asJsObject.fields
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
@@ -41,9 +44,17 @@ class EventRoutingActor extends Actor {
             else
               null
           }
-          val tags = profile("tags").convertTo[List]
+          val tags = profile("tags").convertTo[List[String]]
 
-          val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, language, place_id, city, country, tags)
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+      val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -54,6 +65,7 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
           val settings = profile("setting").asJsObject.fields
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
@@ -75,9 +87,17 @@ class EventRoutingActor extends Actor {
             else
               null
           }
-          val tags = profile("tags").convertTo[List]
+          val tags = profile("tags").convertTo[List[String]]
 
-          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, language, place_id, city, country, tags)
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -88,6 +108,7 @@ class EventRoutingActor extends Actor {
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
           val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
           val settings = profile("setting").asJsObject.fields
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
@@ -109,9 +130,17 @@ class EventRoutingActor extends Actor {
             else
               null
           }
-          val tags = profile("tags").convertTo[List]
+          val tags = profile("tags").convertTo[List[String]]
 
-          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, language, place_id, city, country, tags)
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -144,8 +173,9 @@ class EventRoutingActor extends Actor {
             else
               null
           }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, language, place_id, city, country)
+          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -176,8 +206,9 @@ class EventRoutingActor extends Actor {
             else
               null
           }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country)
+          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -208,8 +239,9 @@ class EventRoutingActor extends Actor {
             else
               null
           }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country)
+          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -230,7 +262,7 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
+          val tags = partup("tags").convertTo[List[String]]
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
@@ -256,7 +288,15 @@ class EventRoutingActor extends Actor {
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -266,7 +306,7 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
+          val tags = partup("tags").convertTo[List[String]]
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
@@ -291,7 +331,15 @@ class EventRoutingActor extends Actor {
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -301,7 +349,7 @@ class EventRoutingActor extends Actor {
           val partup = payload("1").asJsObject.fields
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
+          val tags = partup("tags").convertTo[List[String]]
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
@@ -326,7 +374,15 @@ class EventRoutingActor extends Actor {
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
