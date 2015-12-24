@@ -480,6 +480,17 @@ class EventRoutingActor extends Actor {
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
+        case "updates.comments.removed" =>
+          val payload = event.payload.asJsObject.fields
+          val user = payload("0").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val partup = payload("1").asJsObject.fields
+          val partup_id = partup("_id").convertTo[String]
+
+          val createdEvent = CommentsRemovedEvent(event.timestamp, _id, partup_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
         //Contributions
         case "contribution.inserted" =>
           val payload = event.payload.asJsObject.fields

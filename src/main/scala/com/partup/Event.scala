@@ -82,6 +82,9 @@ case class ContributionsRemovedEvent(timestamp: String, _id: String, partup_id: 
 case class CommentsInsertedEvent(timestamp: String, _id: String, partup_id: String)
   extends Event(timestamp, "updates.comments.inserted")
 
+case class CommentsRemovedEvent(timestamp: String, _id: String, partup_id: String)
+  extends Event(timestamp, "updates.comments.removed")
+
 //Ratings
 case class RatingsInsertedEvent(timestamp: String, _id: String, user_id: String, partup_id: String, rating: Int)
   extends Event(timestamp, "partups.contributions.ratings.inserted")
