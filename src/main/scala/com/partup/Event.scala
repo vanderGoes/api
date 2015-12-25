@@ -33,13 +33,13 @@ case class TribesRemovedEvent(timestamp: String, _id: String)
   extends Event(timestamp, "tribes.removed")
 
 //Teams
-case class PartupsInsertedEvent(timestamp: String, creator_id: String, _id: String, name: String, tags: List[String], language: String, place_id: String, city: String, country: String, network_id: String, privacy_type: Int, type_partup: String, phase: String, deactivatedAt: String)
+case class PartupsInsertedEvent(timestamp: String, creator_id: String, _id: String, name: String, tags: List[String], purpose: String, language: String, place_id: String, city: String, country: String, network_id: String, privacy_type: Int, type_partup: String, phase: String, activity_count: Integer, end_date: String, deactivatedAt: String)
   extends Event(timestamp, "partups.inserted")
 
-case class PartupsUpdatedEvent(timestamp: String, _id: String, name: String, tags: List[String], language: String, place_id: String, city: String, country: String, privacy_type: Int, type_partup: String, phase: String, deactivatedAt: String)
+case class PartupsUpdatedEvent(timestamp: String, _id: String, name: String, tags: List[String], purpose: String, language: String, place_id: String, city: String, country: String, privacy_type: Int, type_partup: String, phase: String, activity_count: Integer, end_date: String, deactivatedAt: String)
   extends Event(timestamp, "partups.updated")
 
-case class PartupsChangedEvent(timestamp: String, _id: String, name: String, tags: List[String], language: String, place_id: String, city: String, country: String, privacy_type: Int, type_partup: String, phase: String, deactivatedAt: String)
+case class PartupsChangedEvent(timestamp: String, _id: String, name: String, tags: List[String], purpose: String, language: String, place_id: String, city: String, country: String, privacy_type: Int, type_partup: String, phase: String, activity_count: Integer, end_date: String, deactivatedAt: String)
   extends Event(timestamp, "partups.changed")
 
 case class PartupsRemovedEvent(timestamp: String, _id: String)

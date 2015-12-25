@@ -186,7 +186,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Teams
-    case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, deactivatedAt) =>
+    case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
 
       val query_me_user = "MERGE (u:User {_id:'{creator_id}'}) "
       val query_me_network = "MERGE (n:Network {_id: '{network_id}'}) "
@@ -199,6 +199,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                              |t.privacy_type={privacy_type},
                              |t.type='{type_partup}',
                              |t.phase='{phase}',
+                             |t.end_date={end_date},
                              |t.active=true
                              |CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:2.0, ratings:[], weight:2.0}]->(t) """.stripMargin
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
@@ -224,10 +225,10 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       if (place_id != null)
         query_cu_location }
 
-      Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
+      Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("activity_count", activity_count), ("end_date", end_date), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt) =>
+    case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'}) """.stripMargin
@@ -236,7 +237,8 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                               |t.language='{language}',
                               |t.privacy_type={privacy_type},
                               |t.type='{type_partup}',
-                              |t.phase='{phase}' """.stripMargin
+                              |t.phase='{phase},
+                              |t.end_date={end_date}' """.stripMargin
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
       val query_set_tags = s"SET t.tags=[$tagsAsString] "
       val query_deactivated = """SET t.deactivatedAt={deactivatedAt},
@@ -255,19 +257,21 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (place_id != null)
           query_cu_location }
 
-      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
+      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("activity_count", activity_count), ("end_date", end_date), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsChangedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, deactivatedAt) =>
+    case PartupsChangedEvent(_, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
       val query_me_location = """MERGE (ci:City {_id: '{place_id}'})
                                 |ON CREATE SET ci.name= '{city}'
                                 |MERGE (co:Country {name: '{country}'}) """.stripMargin
       val query_me_team ="""MERGE (t:Team {_id:'{_id}'})
                             |SET t.name='{name}',
+                            |t.purpose='{purpose}',
                             |t.language='{language}',
                             |t.privacy_type={privacy_type},
                             |t.type='{type_partup}',
-                            |t.phase='{phase}' """.stripMargin
+                            |t.phase='{phase},
+                            |t.end_date={end_date}' """.stripMargin
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
       val query_set_tags = s"SET t.tags=[$tagsAsString] "
       val query_deactivated = """SET t.deactivatedAt={deactivatedAt},
@@ -286,7 +290,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (place_id != null)
           query_cu_location }
 
-      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("deactivatedAt", deactivatedAt))
+      Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("activity_count", activity_count), ("end_date", end_date), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
     case PartupsRemovedEvent(_, _id) =>
