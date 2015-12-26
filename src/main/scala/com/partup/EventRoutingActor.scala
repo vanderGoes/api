@@ -1,8 +1,10 @@
 package com.partup
 
+import java.text.SimpleDateFormat
+
 import akka.actor.{Actor, Props}
 import spray.json.DefaultJsonProtocol._
-import spray.json.{JsValue, _}
+import spray.json._
 
 /**
   * Unpacks RawEvents and sends them to the proper receiver.
@@ -11,87 +13,134 @@ class EventRoutingActor extends Actor {
   override def receive: Receive = {
     case event: RawEvent =>
       event.eventname match {
-        //Teams
-        case "partups.inserted" =>
-          val payload = event.payload.asJsObject.fields
-          val creator_id = payload("0").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val _id = partup("_id").convertTo[String]
-          val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
-          val language = partup("language").convertTo[String]
-          val location = partup("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val network_id = partup("network_id").convertTo[String]
-          val privacy_type = partup("privacy_type").convertTo[Int]
-          val activity_count = partup("activity_count").convertTo[Int]
-          val progress = partup("progress").convertTo[Int]
-          val type_partup = partup("type").convertTo[String]
-          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
-          val type_org_budget = partup("type_organization_budget").convertTo[Int]
-          val phase = partup("phase").convertTo[String]
 
-          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
+        //Users
+        case "user.inserted" =>
+          val payload = event.payload.asJsObject.fields
+          val userID = payload("0").convertTo[String]
+          val user = payload("1").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val profile = user("profile").asJsObject.fields
+          val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
+          val settings = profile("setting").asJsObject.fields
+          val language = settings("language").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = profile("tags").convertTo[List[String]]
+
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+      val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        case "partups.updated" =>
+        case "user.updated" =>
           val payload = event.payload.asJsObject.fields
           val userID = payload("0").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val _id = partup("_id").convertTo[String]
-          val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
-          val language = partup("language").convertTo[String]
-          val location = partup("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val privacy_type = partup("privacy_type").convertTo[Int]
-          val activity_count = partup("activity_count").convertTo[Int]
-          val progress = partup("progress").convertTo[Int]
-          val type_partup = partup("type").convertTo[String]
-          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
-          val type_org_budget = partup("type_organization_budget").convertTo[Int]
-          val phase = partup("phase").convertTo[String]
+          val user = payload("1").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val profile = user("profile").asJsObject.fields
+          val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
+          val settings = profile("setting").asJsObject.fields
+          val language = settings("language").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = profile("tags").convertTo[List[String]]
 
-          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
+
+          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        case "partups.changed" =>
+        case "user.changed" =>
           val payload = event.payload.asJsObject.fields
           val userID = payload("0").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val _id = partup("_id").convertTo[String]
-          val name = partup("name").convertTo[String]
-          val tags = partup("tags").convertTo[List]
-          val language = partup("language").convertTo[String]
-          val location = partup("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val privacy_type = partup("privacy_type").convertTo[Int]
-          val activity_count = partup("activity_count").convertTo[Int]
-          val progress = partup("progress").convertTo[Int]
-          val type_partup = partup("type").convertTo[String]
-          val type_com_budget = partup("type_commercial_budget").convertTo[Int]
-          val type_org_budget = partup("type_organization_budget").convertTo[Int]
-          val phase = partup("phase").convertTo[String]
+          val user = payload("1").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val profile = user("profile").asJsObject.fields
+          val name = profile("name").convertTo[String]
+          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
+          val settings = profile("setting").asJsObject.fields
+          val language = settings("language").convertTo[String]
+          val location = profile("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = profile("tags").convertTo[List[String]]
 
-          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, activity_count, progress, type_partup, type_com_budget, type_org_budget, phase)
+          val deactivatedAt_raw = user("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
 
-          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
-
-        case "partups.removed" =>
-          val payload = event.payload.asJsObject.fields
-          val userID = payload("0").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val _id = partup("_id").convertTo[String]
-
-          val createdEvent = PartupsRemovedEvent(event.timestamp, _id)
+          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -102,14 +151,31 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
           val admin_id = tribe("admin_id").convertTo[String]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, place_id, city, country)
+          val createdEvent = TribesInsertedEvent(event.timestamp, _id, name, privacy_type, admin_id, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -119,13 +185,30 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, place_id, city, country)
+          val createdEvent = TribesUpdatedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -135,13 +218,30 @@ class EventRoutingActor extends Actor {
           val tribe = payload("1").asJsObject.fields
           val _id = tribe("_id").convertTo[String]
           val name = tribe("name").convertTo[String]
-          val privacy_type = tribe("privacy_type").convertTo[String]
+          val privacy_type = tribe("privacy_type").convertTo[Int]
+          val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val tags = tribe("tags").convertTo[List[String]]
 
-          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, place_id, city, country)
+          val createdEvent = TribesChangedEvent(event.timestamp, _id, name, privacy_type, language, place_id, city, country, tags)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -155,55 +255,153 @@ class EventRoutingActor extends Actor {
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        //Users
-        case "user.inserted" =>
+        //Teams
+        case "partups.inserted" =>
           val payload = event.payload.asJsObject.fields
-          val userID = payload("0").convertTo[String]
-          val user = payload("1").asJsObject.fields
-          val _id = user("_id").convertTo[String]
-          val profile = user("profile").asJsObject.fields
-          val name = profile("name").convertTo[String]
-          val location = profile("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val tags = profile("tags").convertTo[List]
+          val creator_id = payload("0").convertTo[String]
+          val partup = payload("1").asJsObject.fields
+          val _id = partup("_id").convertTo[String]
+          val name = partup("name").convertTo[String]
+          val tags = partup("tags").convertTo[List[String]]
+          val purpose = partup("purpose").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val network_id = partup("network_id").convertTo[String]
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val phase = partup("phase").convertTo[String]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val end_date_raw = partup("end_date").convertTo[String]
+          val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
 
-          val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, place_id, city, country, tags)
+          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, purpose, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        case "user.updated" =>
+        case "partups.updated" =>
           val payload = event.payload.asJsObject.fields
           val userID = payload("0").convertTo[String]
-          val user = payload("1").asJsObject.fields
-          val _id = user("_id").convertTo[String]
-          val profile = user("profile").asJsObject.fields
-          val name = profile("name").convertTo[String]
-          val location = profile("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val tags = profile("tags").convertTo[List]
+          val partup = payload("1").asJsObject.fields
+          val _id = partup("_id").convertTo[String]
+          val name = partup("name").convertTo[String]
+          val tags = partup("tags").convertTo[List[String]]
+          val purpose = partup("purpose").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val phase = partup("phase").convertTo[String]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val end_date_raw = partup("end_date").convertTo[String]
+          val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
 
-          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, place_id, city, country, tags)
+          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
-        case "user.changed" =>
+        case "partups.changed" =>
           val payload = event.payload.asJsObject.fields
           val userID = payload("0").convertTo[String]
-          val user = payload("1").asJsObject.fields
-          val _id = user("_id").convertTo[String]
-          val profile = user("profile").asJsObject.fields
-          val name = profile("name").convertTo[String]
-          val location = profile("location").asJsObject.fields
-          val place_id = location("place_id").convertTo[String]
-          val city = location("city").convertTo[String]
-          val country = location("country").convertTo[String]
-          val tags = profile("tags").convertTo[List]
+          val partup = payload("1").asJsObject.fields
+          val _id = partup("_id").convertTo[String]
+          val name = partup("name").convertTo[String]
+          val tags = partup("tags").convertTo[List[String]]
+          val purpose = partup("purpose").convertTo[String]
+          val language = partup("language").convertTo[String]
+          val location = partup("location").asJsObject.fields
+          val place_id = {
+            if (location != null)
+              location("place_id").convertTo[String]
+            else
+              null
+          }
+          val city = {
+            if (location != null)
+              location("city").convertTo[String]
+            else
+              null
+          }
+          val country = {
+            if (location != null)
+              location("country").convertTo[String]
+            else
+              null
+          }
+          val privacy_type = partup("privacy_type").convertTo[Int]
+          val type_partup = partup("type").convertTo[String]
+          val phase = partup("phase").convertTo[String]
+          val activity_count = partup("activity_count").convertTo[Int]
+          val end_date_raw = partup("end_date").convertTo[String]
+          val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
+          val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
+          val deactivatedAt = {
+            if (deactivatedAt_raw != null)
+              new SimpleDateFormat("yyyyMMdd").format(deactivatedAt_raw)
+            else
+              null
+          }
 
-          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, place_id, city, country, tags)
+          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
+        case "partups.removed" =>
+          val payload = event.payload.asJsObject.fields
+          val userID = payload("0").convertTo[String]
+          val partup = payload("1").asJsObject.fields
+          val _id = partup("_id").convertTo[String]
+
+          val createdEvent = PartupsRemovedEvent(event.timestamp, _id)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -279,6 +477,29 @@ class EventRoutingActor extends Actor {
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
+        //Comments
+        case "updates.comments.inserted" =>
+          val payload = event.payload.asJsObject.fields
+          val user = payload("0").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val partup = payload("1").asJsObject.fields
+          val partup_id = partup("_id").convertTo[String]
+
+          val createdEvent = CommentsInsertedEvent(event.timestamp, _id, partup_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
+        case "updates.comments.removed" =>
+          val payload = event.payload.asJsObject.fields
+          val user = payload("0").asJsObject.fields
+          val _id = user("_id").convertTo[String]
+          val partup = payload("1").asJsObject.fields
+          val partup_id = partup("_id").convertTo[String]
+
+          val createdEvent = CommentsRemovedEvent(event.timestamp, _id, partup_id)
+
+          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
+
         //Contributions
         case "contribution.inserted" =>
           val payload = event.payload.asJsObject.fields
@@ -305,18 +526,6 @@ class EventRoutingActor extends Actor {
 
             context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
           }
-
-        //Comments
-        case "updates.comments.inserted" =>
-          val payload = event.payload.asJsObject.fields
-          val user = payload("0").asJsObject.fields
-          val _id = user("_id").convertTo[String]
-          val partup = payload("1").asJsObject.fields
-          val partup_id = partup("_id").convertTo[String]
-
-          val createdEvent = CommentsInsertedEvent(event.timestamp, _id, partup_id)
-
-          context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
         //Ratings
         case "partups.contributions.ratings.inserted" =>
