@@ -19,7 +19,9 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
                               "SET u.name='{name}', " +
                               "u.email='{email}', " +
-                              "u.language='{language}', " +
+                              "u.language='{language}'," +
+                              "u.maxContributions=0, " +
+                              "u.maxComments=0, " +
                               "u.active=true "
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
       val query_set_tags = s"SET u.tags=[$tagsAsString] "
