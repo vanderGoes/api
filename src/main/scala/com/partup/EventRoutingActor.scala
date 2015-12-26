@@ -299,7 +299,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, purpose, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
+          val createdEvent = PartupsInsertedEvent(event.timestamp, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -310,7 +310,6 @@ class EventRoutingActor extends Actor {
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
           val tags = partup("tags").convertTo[List[String]]
-          val purpose = partup("purpose").convertTo[String]
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
@@ -345,7 +344,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
+          val createdEvent = PartupsUpdatedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -356,7 +355,6 @@ class EventRoutingActor extends Actor {
           val _id = partup("_id").convertTo[String]
           val name = partup("name").convertTo[String]
           val tags = partup("tags").convertTo[List[String]]
-          val purpose = partup("purpose").convertTo[String]
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
@@ -391,7 +389,7 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
+          val createdEvent = PartupsChangedEvent(event.timestamp, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 

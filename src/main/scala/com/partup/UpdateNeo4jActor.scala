@@ -188,7 +188,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     //Teams
-    case PartupsInsertedEvent(_, creator_id, _id, name, tags, purpose, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
+    case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
 
       val query_me_user = "MERGE (u:User {_id:'{creator_id}'}) "
       val query_me_network = "MERGE (n:Network {_id: '{network_id}'}) "
@@ -232,7 +232,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(query).on(("creator_id", creator_id), ("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("network_id", network_id), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("activity_count", activity_count), ("end_date", end_date), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsUpdatedEvent(_, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
+    case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
                                 "ON CREATE SET ci.name= '{city}' " +
                                 "MERGE (co:Country {name: '{country}'}) "
@@ -265,13 +265,12 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
       Cypher(query).on(("_id", _id), ("name", name), ("tags", tags), ("language", language), ("place_id", place_id), ("city", city), ("country", country), ("privacy_type", privacy_type), ("type_partup", type_partup), ("phase", phase), ("activity_count", activity_count), ("end_date", end_date), ("deactivatedAt", deactivatedAt))
         .execute()(conn)
 
-    case PartupsChangedEvent(_, _id, name, tags, purpose, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
+    case PartupsChangedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
                                 "ON CREATE SET ci.name= '{city}' " +
                                 "MERGE (co:Country {name: '{country}'}) "
       val query_me_team ="MERGE (t:Team {_id:'{_id}'}) " +
                             "SET t.name='{name}', " +
-                            "t.purpose='{purpose}', " +
                             "t.language='{language}', " +
                             "t.privacy_type={privacy_type}, " +
                             "t.type='{type_partup}', " +
