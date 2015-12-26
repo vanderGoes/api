@@ -288,7 +288,7 @@ class EventRoutingActor extends Actor {
           val privacy_type = partup("privacy_type").convertTo[Int]
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
-          val activity_count = partup("actiity_count").convertTo[Integer]
+          val activity_count = partup("activity_count").convertTo[Int]
           val end_date_raw = partup("end_date").convertTo[String]
           val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
           val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
@@ -334,7 +334,7 @@ class EventRoutingActor extends Actor {
           val privacy_type = partup("privacy_type").convertTo[Int]
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
-          val activity_count = partup("actiity_count").convertTo[Integer]
+          val activity_count = partup("activity_count").convertTo[Int]
           val end_date_raw = partup("end_date").convertTo[String]
           val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
           val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
@@ -380,7 +380,7 @@ class EventRoutingActor extends Actor {
           val privacy_type = partup("privacy_type").convertTo[Int]
           val type_partup = partup("type").convertTo[String]
           val phase = partup("phase").convertTo[String]
-          val activity_count = partup("actiity_count").convertTo[Integer]
+          val activity_count = partup("activity_count").convertTo[Int]
           val end_date_raw = partup("end_date").convertTo[String]
           val end_date = new SimpleDateFormat("yyyyMMdd").format(end_date_raw)
           val deactivatedAt_raw = partup("deactivatedAt").convertTo[String]
