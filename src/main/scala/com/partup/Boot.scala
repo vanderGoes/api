@@ -22,6 +22,10 @@ object Boot extends App {
   val service = system.actorOf(Props[EventsApiActor])
   implicit val timeout = Timeout(5.seconds)
 
+  val port = Option(System.getenv("API_PORT")).getOrElse("8080").toInt
+  // start a new HTTP server on port 8080 with our service actor as the handler
+  IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = port)
+
   def createEventRoutingActor = {
     val neo4jHost = Option(System.getenv("NEO4J_HOST"))
     if (neo4jHost.isDefined) {
@@ -44,8 +48,4 @@ object Boot extends App {
       system.actorOf(Props[NoOpActor], "eventLogger")
     }
   }
-
-  val port = Option(System.getenv("API_PORT")).getOrElse("8080").toInt
-  // start a new HTTP server on port 8080 with our service actor as the handler
-  IO(Http) ? Http.Bind(service, interface = "0.0.0.0", port = port)
 }
