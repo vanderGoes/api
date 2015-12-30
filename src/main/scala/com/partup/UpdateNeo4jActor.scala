@@ -12,94 +12,146 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     //NODES
     //Users
-    case UsersInsertedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
+    case UsersInsertedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
+        "ON CREATE SET ci.name= '{city}' " +
+        "MERGE (co:Country {name: '{country}'}) "
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-                              "SET u.name='{name}', " +
-                              "u.email='{email}', " +
-                              "u.language='{language}'," +
-                              "u.maxContributions=0, " +
-                              "u.maxComments=0, " +
-                              "u.active=true "
-      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
+        "SET u.name='{name}', " +
+        "u.email='{email}', " +
+        "u.language='{language}'," +
+        "u.maxContributions=0, " +
+        "u.maxComments=0, " +
+        "u.active=true "
+      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
+        "ON CREATE SET s0.name= '" + name_0 + "' " +
+        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
+        "ON CREATE SET s1.name= '" + name_1 + "' "
+      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
       val query_set_tags = s"SET u.tags=[$tagsAsString] "
       val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-                                "u.active=false "
+        "u.active=false "
       val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
-                                "(ci)-[:LIVES_IN]->(co)"
-
-      val query = {
-          if (place_id != null)
-            query_me_location } +
-          query_me_user + {
-          if (tags!=null)
-            query_set_tags } + {
-          if (deactivatedAt != null)
-            query_deactivated } + {
-          if (place_id != null)
-            query_cu_location
-      }
-      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("deactivatedAt", deactivatedAt), ("place_id", place_id), ("country", country), ("tags", tags))
-        .execute()(conn)
-
-    case UsersUpdatedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-                              "SET u.name='{name}', " +
-                              "u.email='email', " +
-                              "u.language='{language}' "
-      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET u.tags=[$tagsAsString] "
-      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-                                "u.active=false "
-      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
-                                "(ci)-[:LIVES_IN]->(co) "
+        "(ci)-[:LIVES_IN]->(co)"
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
+        "SET r0.score=" + score_0 + " " +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
+        "SET r1.score=" + score_1
 
       val query = {
         if (place_id != null)
-          query_me_location } +
+          query_me_location
+      } +
         query_me_user + {
-        if (tags!=null)
-          query_set_tags } + {
+        if (code_0 != 0)
+          query_me_strength
+      } + {
+        if (tags != null)
+          query_set_tags
+      } + {
         if (deactivatedAt != null)
-          query_deactivated } + {
+          query_deactivated
+      } + {
         if (place_id != null)
           query_cu_location
+      } + {
+        if (code_0 != 0)
+          query_cu_strength
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
+      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("deactivatedAt", deactivatedAt), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
         .execute()(conn)
 
-    case UsersChangedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags) =>
+    case UsersUpdatedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
+        "ON CREATE SET ci.name= '{city}' " +
+        "MERGE (co:Country {name: '{country}'}) "
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-                              "SET u.name='{name}', " +
-                              "u.email='{email}', " +
-                              "u.language='{language}' "
-      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
+        "SET u.name='{name}', " +
+        "u.email='email', " +
+        "u.language='{language}' "
+      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
+        "ON CREATE SET s0.name= '" + name_0 + "' " +
+        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
+        "ON CREATE SET s1.name= '" + name_1 + "' "
+      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
       val query_set_tags = s"SET u.tags=[$tagsAsString] "
       val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-                                "u.active=false "
+        "u.active=false "
       val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
-                                "(ci)-[:LIVES_IN]->(co) "
+        "(ci)-[:LIVES_IN]->(co) "
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
+        "SET r0.score=" + score_0 + " " +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
+        "SET r1.score=" + score_1
 
       val query = {
         if (place_id != null)
-          query_me_location } +
+          query_me_location
+      } +
         query_me_user + {
-        if (tags!=null)
-          query_set_tags } + {
+        if (code_0 != 0)
+          query_me_strength
+      } + {
+        if (tags != null)
+          query_set_tags
+      } + {
         if (deactivatedAt != null)
-          query_deactivated } + {
+          query_deactivated
+      } + {
         if (place_id != null)
-          query_cu_location }
+          query_cu_location
+      } + {
+        if (code_0 != 0)
+          query_cu_strength
+      }
+      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
+        .execute()(conn)
 
-      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags))
+    case UsersChangedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
+        "ON CREATE SET ci.name= '{city}' " +
+        "MERGE (co:Country {name: '{country}'}) "
+      val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
+        "SET u.name='{name}', " +
+        "u.email='{email}', " +
+        "u.language='{language}' "
+      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
+        "ON CREATE SET s0.name= '" + name_0 + "' " +
+        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
+        "ON CREATE SET s1.name= '" + name_1 + "' "
+      val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
+      val query_set_tags = s"SET u.tags=[$tagsAsString] "
+      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
+        "u.active=false "
+      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
+        "(ci)-[:LIVES_IN]->(co) "
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
+        "SET r0.score=" + score_0 + " " +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
+        "SET r1.score=" + score_1
+
+      val query = {
+        if (place_id != null)
+          query_me_location
+      } +
+        query_me_user + {
+        if (code_0 != 0)
+          query_me_strength
+      } + {
+        if (tags != null)
+          query_set_tags
+      } + {
+        if (deactivatedAt != null)
+          query_deactivated
+      } + {
+        if (place_id != null)
+          query_cu_location
+      } + {
+        if (code_0 != 0)
+          query_cu_strength
+      }
+
+      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
         .execute()(conn)
 
     //Networks

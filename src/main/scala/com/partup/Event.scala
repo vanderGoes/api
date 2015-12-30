@@ -9,13 +9,13 @@ case class RawEvent(timestamp: String, eventname: String, payload: JsValue) exte
 
 //NODES
 //Users
-case class UsersInsertedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String])
+case class UsersInsertedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String], code_0: Int, name_0: String, score_0: Int, code_1: Int, name_1: String, score_1: Int)
   extends Event(timestamp, "users.inserted")
 
-case class UsersUpdatedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String])
+case class UsersUpdatedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String], code_0: Int, name_0: String, score_0: Int, code_1: Int, name_1: String, score_1: Int)
   extends Event(timestamp, "users.updated")
 
-case class UsersChangedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String])
+case class UsersChangedEvent(timestamp: String, _id: String, name: String, email: String, language: String, deactivatedAt: String, place_id: String, city: String, country: String, tags: List[String], code_0: Int, name_0: String, score_0: Int, code_1: Int, name_1: String, score_1: Int)
   extends Event(timestamp, "users.changed")
 
 

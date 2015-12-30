@@ -54,7 +54,45 @@ class EventRoutingActor extends Actor {
               null
           }
 
-      val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
+          val meurs = profile("meurs").asJsObject.fields
+          val code_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+          val code_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+
+      val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -97,7 +135,45 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
+          val meurs = profile("meurs").asJsObject.fields
+          val code_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+          val code_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+
+          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -140,7 +216,45 @@ class EventRoutingActor extends Actor {
               null
           }
 
-          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags)
+          val meurs = profile("meurs").asJsObject.fields
+          val code_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_0 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+          val code_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
+            else
+              0
+          }
+          val name_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
+            else
+              null
+          }
+          val score_1 = {
+            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+              meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
+            else
+              0
+          }
+
+          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
