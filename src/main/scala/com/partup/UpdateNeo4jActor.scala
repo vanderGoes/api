@@ -12,14 +12,12 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     //NODES
     //Users
-    case UsersInsertedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
+    case UsersInsertedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
         "ON CREATE SET ci.name= '{city}' " +
         "MERGE (co:Country {name: '{country}'}) "
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-        "SET u.name='{name}', " +
-        "u.email='{email}', " +
-        "u.language='{language}'," +
+        "SET u.language='{language}'," +
         "u.maxContributions=0, " +
         "u.maxComments=0, " +
         "u.active=true "
@@ -58,17 +56,15 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (code_0 != 0)
           query_cu_strength
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("language", language), ("deactivatedAt", deactivatedAt), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
+      Cypher(query).on(("_id", _id), ("deactivatedAt", deactivatedAt), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
         .execute()(conn)
 
-    case UsersUpdatedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
+    case UsersUpdatedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
         "ON CREATE SET ci.name= '{city}' " +
         "MERGE (co:Country {name: '{country}'}) "
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-        "SET u.name='{name}', " +
-        "u.email='email', " +
-        "u.language='{language}' "
+        "SET u.language='{language}' "
       val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
         "ON CREATE SET s0.name= '" + name_0 + "' " +
         "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
@@ -104,17 +100,15 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         if (code_0 != 0)
           query_cu_strength
       }
-      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
+      Cypher(query).on(("_id", _id), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
         .execute()(conn)
 
-    case UsersChangedEvent(_, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
+    case UsersChangedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
       val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
         "ON CREATE SET ci.name= '{city}' " +
         "MERGE (co:Country {name: '{country}'}) "
       val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-        "SET u.name='{name}', " +
-        "u.email='{email}', " +
-        "u.language='{language}' "
+        "SET u.language='{language}' "
       val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
         "ON CREATE SET s0.name= '" + name_0 + "' " +
         "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
@@ -151,7 +145,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
           query_cu_strength
       }
 
-      Cypher(query).on(("_id", _id), ("name", name), ("email", email), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
+      Cypher(query).on(("_id", _id), ("language", language), ("place_id", place_id), ("country", country), ("tags", tags), ("code_0", code_0), ("name_0", name_0), ("score_0", score_0), ("code_1", code_1), ("name_1", name_1), ("score_1", score_1))
         .execute()(conn)
 
     //Networks
@@ -257,7 +251,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
                              "t.partners=1, " +
                              "t.end_date={end_date}, " +
                              "t.active=true " +
-                             "CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:2.0, ratings:[], weight:2.0}]->(t) "
+                             "CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:2.0, ratings:[], role:2.0}]->(t) "
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
       val query_set_tags = s"SET t.tags=[$tagsAsString] "
       val query_deactivated = "SET t.deactivatedAt={deactivatedAt}, " +
@@ -365,7 +359,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
            "(t:Team {_id:'{partup_id}'}) " +
            "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t) " +
            "SET r.contributions=1, " +
-           "r.weight=1.5, " +
+           "r.role=1.5, " +
            "u.maxContributions=u.maxContributions+1, " +
            "t.partners=t.partners+1, " +
            "r.participation=1.5+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)"
@@ -378,14 +372,14 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         "MERGE (u:User {_id:'{_id}'), " +
            "(t:Team {_id:'{partup_id}'}) " +
            "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t) " +
-           "SET r.weight=1.0, " +
+           "SET r.role=1.0, " +
            "r.participation=1.0+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)"
          ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case SupportersRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN {weight:1.0}]->(t:Team {_id:'{partup_id}'}) " +
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN {role:1.0}]->(t:Team {_id:'{partup_id}'}) " +
            "DELETE r"
          ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -426,7 +420,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case ContributionsInsertedEvent(_, _id, partup_id) =>
       Cypher(
         "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
+          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
           "r " +
           "SET r.contributions=r.contributions+1, " +
           "u.maxContributions=u.maxContributions+1, " +
@@ -437,7 +431,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case ContributionsRemovedEvent(_, _id, partup_id) =>
       Cypher(
         "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})  " +
-          "WITH r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
+          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
           "r " +
           "SET r.contributions=r.contributions-1, " +
           "u.maxContributions=u.maxContributions-1, " +
@@ -449,7 +443,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case CommentsInsertedEvent(_, _id, partup_id) =>
       Cypher(
         "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
+          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
           "r " +
           "SET r.comments=r.comments+1, " +
           "u.maxComments=u.maxComments+1, " +
@@ -460,7 +454,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case CommentsRemovedEvent(_, _id, partup_id) =>
       Cypher(
         "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
+          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
           "r " +
           "SET r.comments=r.comments-1, " +
           "u.maxComments=u.maxComments-1, " +
@@ -472,7 +466,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     case RatingsInsertedEvent(_, _, user_id, partup_id, rating) =>
       Cypher(
         "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.weight+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
+          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
           "r " +
           "SET r.ratings=r.ratings+[{rating}], " +
           "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"

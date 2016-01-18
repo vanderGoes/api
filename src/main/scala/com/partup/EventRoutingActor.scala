@@ -21,25 +21,23 @@ class EventRoutingActor extends Actor {
           val user = payload("1").asJsObject.fields
           val _id = user("_id").convertTo[String]
           val profile = user("profile").asJsObject.fields
-          val name = profile("name").convertTo[String]
-          val email = user("emails").convertTo[JsArray].elements(0).asJsObject.fields("address").convertTo[String]
           val settings = profile("setting").asJsObject.fields
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -56,43 +54,43 @@ class EventRoutingActor extends Actor {
 
           val meurs = profile("meurs").asJsObject.fields
           val code_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
           val code_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
 
-      val createdEvent = UsersInsertedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
+      val createdEvent = UsersInsertedEvent(event.timestamp, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -108,19 +106,19 @@ class EventRoutingActor extends Actor {
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -137,43 +135,43 @@ class EventRoutingActor extends Actor {
 
           val meurs = profile("meurs").asJsObject.fields
           val code_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
           val code_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
 
-          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
+          val createdEvent = UsersUpdatedEvent(event.timestamp, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -189,19 +187,19 @@ class EventRoutingActor extends Actor {
           val language = settings("language").convertTo[String]
           val location = profile("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -218,43 +216,43 @@ class EventRoutingActor extends Actor {
 
           val meurs = profile("meurs").asJsObject.fields
           val code_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_0 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(0).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
           val code_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("code").convertTo[Int]
             else
               0
           }
           val name_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("name").convertTo[String]
             else
               null
           }
           val score_1 = {
-            if (meurs != null && meurs("fetched_results").convertTo[Boolean]!=null)
+            if (!meurs.equals(null) && !meurs("fetched_results").convertTo[Boolean].equals(true))
               meurs("results").convertTo[JsArray].elements(1).asJsObject.fields("score").convertTo[Int]
             else
               0
           }
 
-          val createdEvent = UsersChangedEvent(event.timestamp, _id, name, email, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
+          val createdEvent = UsersChangedEvent(event.timestamp, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1)
 
           context.actorOf(Props[UpdateNeo4jActor]) ! createdEvent
 
@@ -270,19 +268,19 @@ class EventRoutingActor extends Actor {
           val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -303,19 +301,19 @@ class EventRoutingActor extends Actor {
           val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -336,19 +334,19 @@ class EventRoutingActor extends Actor {
           val language = tribe("language").convertTo[String]
           val location = tribe("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -381,19 +379,19 @@ class EventRoutingActor extends Actor {
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -427,19 +425,19 @@ class EventRoutingActor extends Actor {
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
@@ -472,19 +470,19 @@ class EventRoutingActor extends Actor {
           val language = partup("language").convertTo[String]
           val location = partup("location").asJsObject.fields
           val place_id = {
-            if (location != null)
+            if (!location.isEmpty)
               location("place_id").convertTo[String]
             else
               null
           }
           val city = {
-            if (location != null)
+            if (!location.isEmpty)
               location("city").convertTo[String]
             else
               null
           }
           val country = {
-            if (location != null)
+            if (!location.isEmpty)
               location("country").convertTo[String]
             else
               null
