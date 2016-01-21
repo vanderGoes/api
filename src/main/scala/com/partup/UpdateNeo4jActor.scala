@@ -13,28 +13,28 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //NODES
     //Users
     case UsersInsertedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-        "ON CREATE SET ci.name= '{city}' " +
-        "MERGE (co:Country {name: '{country}'}) "
-      val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+        "ON CREATE SET ci.name= '{city}'\n" +
+        "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_user = "MERGE (u:User {_id:'{_id}'})\n" +
         "SET u.language='{language}'," +
-        "u.maxContributions=0, " +
-        "u.maxComments=0, " +
-        "u.active=true "
-      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
-        "ON CREATE SET s0.name= '" + name_0 + "' " +
-        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
-        "ON CREATE SET s1.name= '" + name_1 + "' "
+        "u.maxContributions=0," +
+        "u.maxComments=0," +
+        "u.active=true\n"
+      val query_me_strength = "MERGE (s0:Strength {code: '{code_0}'})\n" +
+        "ON CREATE SET s0.name= '" + name_0 + "'\n" +
+        "MERGE (s1:Strength {code: '" + code_1 + "'})\n" +
+        "ON CREATE SET s1.name= '" + name_1 + "'\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
-      val query_set_tags = s"SET u.tags=[$tagsAsString] "
-      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-        "u.active=false "
-      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
+      val query_set_tags = s"SET u.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}," +
+        "u.active=false\n"
+      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci)," +
         "(ci)-[:LIVES_IN]->(co)"
-      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
-        "SET r0.score=" + score_0 + " " +
-        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
-        "SET r1.score=" + score_1
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0)\n" +
+        "SET r0.score={score_0}\n" +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1)\n" +
+        "SET r1.score={score_1}"
 
       val query = {
         if (place_id != null)
@@ -60,25 +60,25 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case UsersUpdatedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-        "ON CREATE SET ci.name= '{city}' " +
-        "MERGE (co:Country {name: '{country}'}) "
-      val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-        "SET u.language='{language}' "
-      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
-        "ON CREATE SET s0.name= '" + name_0 + "' " +
-        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
-        "ON CREATE SET s1.name= '" + name_1 + "' "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+        "ON CREATE SET ci.name= '{city}'\n" +
+        "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_user = "MERGE (u:User {_id:'{_id}'})\n" +
+        "SET u.language='{language}'\n"
+      val query_me_strength = "MERGE (s0:Strength {code: '{code_0}'})\n" +
+        "ON CREATE SET s0.name= '{name_0}'\n" +
+        "MERGE (s1:Strength {code: '{code_1}' })\n" +
+        "ON CREATE SET s1.name= '{name_1}'\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
-      val query_set_tags = s"SET u.tags=[$tagsAsString] "
-      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-        "u.active=false "
-      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
-        "(ci)-[:LIVES_IN]->(co) "
-      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
-        "SET r0.score=" + score_0 + " " +
-        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
-        "SET r1.score=" + score_1
+      val query_set_tags = s"SET u.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}," +
+        "u.active=false\n"
+      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci)," +
+        "(ci)-[:LIVES_IN]->(co)\n"
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0)\n" +
+        "SET r0.score={score_0}\n" +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1)\n" +
+        "SET r1.score={score_1}"
 
       val query = {
         if (place_id != null)
@@ -104,25 +104,25 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case UsersChangedEvent(_, _id, language, deactivatedAt, place_id, city, country, tags, code_0, name_0, score_0, code_1, name_1, score_1) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-        "ON CREATE SET ci.name= '{city}' " +
-        "MERGE (co:Country {name: '{country}'}) "
-      val query_me_user = "MERGE (u:User {_id:'{_id}'}) " +
-        "SET u.language='{language}' "
-      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'}) " +
-        "ON CREATE SET s0.name= '" + name_0 + "' " +
-        "MERGE (s1:Strength {code: '" + code_1 + "'}) " +
-        "ON CREATE SET s1.name= '" + name_1 + "' "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+        "ON CREATE SET ci.name= '{city}'\n" +
+        "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_user = "MERGE (u:User {_id:'{_id}'})\n" +
+        "SET u.language='{language}'\n"
+      val query_me_strength = "MERGE (s0:Strength {code: '" + code_0 + "'})\n" +
+        "ON CREATE SET s0.name= '{name_0}'\n" +
+        "MERGE (s1:Strength {code: '{code_1}'})\n" +
+        "ON CREATE SET s1.name= '{name_1}'\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it: String) => acc + "," + it)
-      val query_set_tags = s"SET u.tags=[$tagsAsString] "
-      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}, " +
-        "u.active=false "
-      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci), " +
-        "(ci)-[:LIVES_IN]->(co) "
-      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0) " +
-        "SET r0.score=" + score_0 + " " +
-        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1) " +
-        "SET r1.score=" + score_1
+      val query_set_tags = s"SET u.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET u.deactivatedAt={deactivatedAt}," +
+        "u.active=false\n"
+      val query_cu_location = "CREATE UNIQUE (u)-[:LIVES_IN]->(ci)," +
+        "(ci)-[:LIVES_IN]->(co)\n"
+      val query_cu_strength = "CREATE UNIQUE (u)-[r0:HOLDS]->(s0)\n" +
+        "SET r0.score={score_0}\n" +
+        "CREATE UNIQUE (u)-[r1:HOLDS]->(s1)\n" +
+        "SET r1.score={score_1}"
 
       val query = {
         if (place_id != null)
@@ -150,19 +150,19 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     //Networks
     case TribesInsertedEvent(_, _id, name, privacy_type, admin_id, language, place_id, city, country, tags) =>
-      val query_me_user = "MERGE (u:User {_id:'{admin_id}'}) "
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_network = "MERGE (n:Network {_id:'{_id}'}) " +
-                              "SET n.name='{name}', " +
-                              "n.language='{language}', " +
-                              "n.privacy_type:{privacy_type} " +
-                              "CREATE UNIQUE (u)-[:MEMBER_OF {admin:true}]->(n) "
+      val query_me_user = "MERGE (u:User {_id:'{admin_id}'})\n"
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_network = "MERGE (n:Network {_id:'{_id}'})\n" +
+                              "SET n.name='{name}'," +
+                              "n.language='{language}'," +
+                              "n.privacy_type:{privacy_type}\n" +
+                              "CREATE UNIQUE (u)-[:MEMBER_OF {admin:true}]->(n)\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET n.tags=[$tagsAsString] "
-      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci), " +
-                                "(ci)-[:LOCATED_IN]->(co) "
+      val query_set_tags = s"SET n.tags=[$tagsAsString]\n"
+      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci)," +
+                                "(ci)-[:LOCATED_IN]->(co)"
 
       val query = query_me_user + {
         if (place_id != null)
@@ -177,17 +177,17 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case TribesUpdatedEvent(_, _id, name, privacy_type, language, place_id, city, country, tags) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_network = "MERGE (n:Network {_id:'{_id}'}) " +
-                               "SET n.name='{name}', " +
-                               "n.language='{language}', " +
-                               "n.privacy_type:{privacy_type} "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_network = "MERGE (n:Network {_id:'{_id}'})\n" +
+                               "SET n.name='{name}'," +
+                               "n.language='{language}'," +
+                               "n.privacy_type:{privacy_type}\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET n.tags=[$tagsAsString] "
-      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci), " +
-                                "(ci)-[:LOCATED_IN]->(co) "
+      val query_set_tags = s"SET n.tags=[$tagsAsString]\n"
+      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci)," +
+                                "(ci)-[:LOCATED_IN]->(co)"
 
       val query = {
         if (place_id != null)
@@ -202,16 +202,16 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case TribesChangedEvent(_, _id, name, privacy_type, language, place_id, city, country, tags) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_network = "MERGE (n:Network {_id:'{_id}'}) " +
-                               "SET n.name='{name}', " +
-                               "n.language='{language}', " +
-                               "n.privacy_type:{privacy_type} "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_network = "MERGE (n:Network {_id:'{_id}'})\n" +
+                               "SET n.name='{name}'," +
+                               "n.language='{language}'," +
+                               "n.privacy_type:{privacy_type}\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
       val query_set_tags = s"SET n.tags=[$tagsAsString] "
-      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci), " +
+      val query_cu_location = "CREATE UNIQUE (n)-[:LOCATED_IN]->(ci)," +
                                 "(ci)-[:LOCATED_IN]->(co) "
 
       val query = {
@@ -228,7 +228,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
 
     case TribesRemovedEvent(_, _id) =>
       Cypher(
-        "MATCH (n:Network {_id:'{_id}'}) " +
+        "MATCH (n:Network {_id:'{_id}'})\n" +
           "DETACH DELETE n"
         ).on(("_id", _id))
         .execute()(conn)
@@ -236,29 +236,29 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Teams
     case PartupsInsertedEvent(_, creator_id, _id, name, tags, language, place_id, city, country, network_id, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
 
-      val query_me_user = "MERGE (u:User {_id:'{creator_id}'}) "
-      val query_me_network = "MERGE (n:Network {_id: '{network_id}'}) "
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_team = "MERGE (t:Team {_id:'{_id}'}) " +
-                             "SET t.name='{name}', " +
-                             "t.language='{language}', " +
-                             "t.privacy_type={privacy_type}, " +
-                             "t.type='{type_partup}', " +
-                             "t.phase='{phase}', " +
-                             "t.activity_count={activity_count}, " +
-                             "t.partners=1, " +
-                             "t.end_date={end_date}, " +
-                             "t.active=true " +
-                             "CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:2.0, ratings:[], role:2.0}]->(t) "
+      val query_me_user = "MERGE (u:User {_id:'{creator_id}'})\n"
+      val query_me_network = "MERGE (n:Network {_id: '{network_id}'})\n"
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_team = "MERGE (t:Team {_id:'{_id}'})\n" +
+                             "SET t.name='{name}'," +
+                             "t.language='{language}'," +
+                             "t.privacy_type={privacy_type}," +
+                             "t.type='{type_partup}'," +
+                             "t.phase='{phase}'," +
+                             "t.activity_count={activity_count}," +
+                             "t.partners=1," +
+                             "t.end_date={end_date}," +
+                             "t.active=true\n" +
+                             "CREATE UNIQUE (u)-[:ACTIVE_IN {creator:true, comments:0, contributions:0, pageViews:0, participation:2.0, ratings:[], role:2.0}]->(t)\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET t.tags=[$tagsAsString] "
-      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}, " +
-                                "t.active=false "
-      val query_cu_network = "CREATE UNIQUE (t)-[:PART_OF]->(n) "
-      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci), " +
-                                "(ci)-[:LOCATED_IN]->(co) "
+      val query_set_tags = s"SET t.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}," +
+                                "t.active=false\n"
+      val query_cu_network = "CREATE UNIQUE (t)-[:PART_OF]->(n)\n"
+      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci)," +
+                                "(ci)-[:LOCATED_IN]->(co)"
 
     val query = query_me_user + {
       if (network_id != null)
@@ -279,22 +279,22 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case PartupsUpdatedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_team = "MERGE (t:Team {_id:'{_id}'}) " +
-                              "SET t.name='{name}', " +
-                              "t.language='{language}', " +
-                              "t.privacy_type={privacy_type}, " +
-                              "t.type='{type_partup}', " +
-                              "t.phase='{phase}, " +
-                              "t.activity_count={activity_count}, " +
-                              "t.end_date={end_date}' "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_team = "MERGE (t:Team {_id:'{_id}'})\n" +
+                              "SET t.name='{name}'," +
+                              "t.language='{language}'," +
+                              "t.privacy_type={privacy_type}," +
+                              "t.type='{type_partup}'," +
+                              "t.phase='{phase}," +
+                              "t.activity_count={activity_count}," +
+                              "t.end_date={end_date}'/n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET t.tags=[$tagsAsString] "
-      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}, " +
-                                "t.active=false "
-      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci), " +
+      val query_set_tags = s"SET t.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}," +
+                                "t.active=false\n"
+      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci)," +
                                 "(ci)-[:LOCATED_IN]->(co)"
 
       val query = {
@@ -312,23 +312,23 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
         .execute()(conn)
 
     case PartupsChangedEvent(_, _id, name, tags, language, place_id, city, country, privacy_type, type_partup, phase, activity_count, end_date, deactivatedAt) =>
-      val query_me_location = "MERGE (ci:City {_id: '{place_id}'}) " +
-                                "ON CREATE SET ci.name= '{city}' " +
-                                "MERGE (co:Country {name: '{country}'}) "
-      val query_me_team ="MERGE (t:Team {_id:'{_id}'}) " +
-                            "SET t.name='{name}', " +
-                            "t.language='{language}', " +
-                            "t.privacy_type={privacy_type}, " +
-                            "t.type='{type_partup}', " +
-                            "t.phase='{phase}, " +
-                            "t.activity_count={activity_count}, " +
-                            "t.end_date={end_date}' "
+      val query_me_location = "MERGE (ci:City {_id: '{place_id}'})\n" +
+                                "ON CREATE SET ci.name= '{city}'\n" +
+                                "MERGE (co:Country {name: '{country}'})\n"
+      val query_me_team ="MERGE (t:Team {_id:'{_id}'})\n" +
+                            "SET t.name='{name}'," +
+                            "t.language='{language}'," +
+                            "t.privacy_type={privacy_type}," +
+                            "t.type='{type_partup}'," +
+                            "t.phase='{phase}," +
+                            "t.activity_count={activity_count}," +
+                            "t.end_date={end_date}'\n"
       val tagsAsString = tags.map("'" + _ + "'").reduce((acc, it : String) => acc + "," + it)
-      val query_set_tags = s"SET t.tags=[$tagsAsString] "
-      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}, " +
-                                "t.active=false "
-      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci), " +
-                                "(ci)-[:LOCATED_IN]->(co) "
+      val query_set_tags = s"SET t.tags=[$tagsAsString]\n"
+      val query_deactivated = "SET t.deactivatedAt={deactivatedAt}," +
+                                "t.active=false\n"
+      val query_cu_location = "CREATE UNIQUE (t)-[:LOCATED_IN]->(ci)," +
+                                "(ci)-[:LOCATED_IN]->(co)"
 
       val query = {
         if (place_id != null)
@@ -355,31 +355,28 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Partners
     case PartnersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'), " +
-           "(t:Team {_id:'{partup_id}'}) " +
-           "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t) " +
-           "SET r.contributions=1, " +
-           "r.role=1.5, " +
-           "u.maxContributions=u.maxContributions+1, " +
-           "t.partners=t.partners+1, " +
-           "r.participation=1.5+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)"
+        "MATCH (u:User {_id:'{_id}')," +
+           "(t:Team {_id:'{partup_id}'})\n" +
+           "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t)\n" +
+           "SET r.contributions=1," +
+           "r.role=1.5," +
+           "t.partners=t.partners+1"
          ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Supporters
     case SupportersInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        "MERGE (u:User {_id:'{_id}'), " +
-           "(t:Team {_id:'{partup_id}'}) " +
-           "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t) " +
-           "SET r.role=1.0, " +
-           "r.participation=1.0+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0)"
+        "MERGE (u:User {_id:'{_id}')," +
+           "(t:Team {_id:'{partup_id}'})\n" +
+           "CREATE UNIQUE (u)-[r:ACTIVE_IN]->(t)\n" +
+           "SET r.role=1.0"
          ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case SupportersRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN {role:1.0}]->(t:Team {_id:'{partup_id}'}) " +
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN {role:1.0}]->(t:Team {_id:'{partup_id}'})\n" +
            "DELETE r"
          ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -387,23 +384,23 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Members
     case MembersAcceptedEvent(_, _id, tribe_id) =>
       Cypher(
-        "MERGE (u:User {_id:'{_id}'}), " +
-          "(n:Network {_id:'{tribe_id}'}) " +
+        "MERGE (u:User {_id:'{_id}'})," +
+          "(n:Network {_id:'{tribe_id}'})\n" +
           "CREATE UNIQUE (u)-[:MEMBER_OF]->(t)"
         ).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
     case MembersInsertedEvent(_, _id, tribe_id) =>
       Cypher(
-        "MERGE (u:User {_id:'{_id}'}), " +
-          "(n:Network {_id:'{tribe_id}'}) " +
+        "MERGE (u:User {_id:'{_id}'})," +
+          "(n:Network {_id:'{tribe_id}'})\n" +
           "CREATE UNIQUE (u)-[:MEMBER_OF]->(n)"
         ).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
 
     case MembersRemovedEvent(_, _id, tribe_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id'})-[r:MEMBER_OF]->(n:Network {_id:'{tribe_id}'}) " +
+        "MATCH (u:User {_id:'{_id'})-[r:MEMBER_OF]->(n:Network {_id:'{tribe_id}'})\n" +
           "DELETE r"
         ).on(("_id", _id), ("tribe_id", tribe_id))
         .execute()(conn)
@@ -411,7 +408,7 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Analytics
     case AnalyticsPageViewEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'}-[r:ACTIVE_IN]->(t:Team {_id:'{'partup_id}'}) " +
+        "MATCH (u:User {_id:'{_id}'}-[r:ACTIVE_IN]->(t:Team {_id:'{'partup_id}'})\n" +
           "SET r.pageViews=r.pageViews+1"
         ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
@@ -419,57 +416,38 @@ class UpdateNeo4jActor(conn: Neo4jREST) extends Actor {
     //Contributions
     case ContributionsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
-          "r " +
-          "SET r.contributions=r.contributions+1, " +
-          "u.maxContributions=u.maxContributions+1, " +
-          "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})\n" +
+          "SET r.contributions=r.contributions+1"
         ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case ContributionsRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})  " +
-          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
-          "r " +
-          "SET r.contributions=r.contributions-1, " +
-          "u.maxContributions=u.maxContributions-1, " +
-          "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})\n" +
+          "SET r.contributions=r.contributions-1"
         ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Comments
     case CommentsInsertedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
-          "r " +
-          "SET r.comments=r.comments+1, " +
-          "u.maxComments=u.maxComments+1, " +
-          "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})\n" +
+          "SET r.comments=r.comments+1"
         ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     case CommentsRemovedEvent(_, _id, partup_id) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
-          "r " +
-          "SET r.comments=r.comments-1, " +
-          "u.maxComments=u.maxComments-1, " +
-          "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})\n" +
+          "SET r.comments=r.comments-1"
         ).on(("_id", _id), ("partup_id", partup_id))
         .execute()(conn)
 
     //Ratings
     case RatingsInsertedEvent(_, _, user_id, partup_id, rating) =>
       Cypher(
-        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'}) " +
-          "WITH r.role+(r.contributions/(toFloat(u.maxContributions)+0.00001)*2.0)+(r.comments/(toFloat(u.maxComments)+0.00001)*1.0) AS part, " +
-          "r " +
-          "SET r.ratings=r.ratings+[{rating}], " +
-          "r.participation=((REDUCE(avg=0, i IN r.ratings | avg + (i/20)))+part)/(LENGTH(r.ratings)+1)"
+        "MATCH (u:User {_id:'{_id}'})-[r:ACTIVE_IN]->(t:Team {_id:'{partup_id}'})\n" +
+          "SET r.ratings=r.ratings+[{rating}]"
         ).on(("user_id", user_id), ("partup_id", partup_id), ("rating", rating))
         .execute()(conn)
   }
